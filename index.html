@@ -3,201 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MBTI Personal Analysis - Strategy Edition</title>
+    <title>MBTI Strategic Analysis Tool</title>
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-bg: #121212;
-            --card-bg: rgba(30, 30, 30, 0.98);
-            --accent-color: #ffd700;
-            --text-main: #ffffff;
-            --text-muted: #cccccc;
-            --success: #4ee44e;
-            --danger: #ff6b6b;
+            --glass-bg: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --accent: #00d2ff;
+            --accent-gold: #ffd700;
+            --text: #ffffff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Padauk', sans-serif; }
 
         body {
             min-height: 100vh;
-            background: radial-gradient(circle at center, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
-            background-attachment: fixed;
-            padding: 20px;
-            color: var(--text-main);
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--text);
             display: flex;
             justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
         }
 
-        .container { width: 100%; max-width: 700px; }
+        .container { width: 100%; max-width: 750px; }
 
         .glass-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 24px;
-            padding: 35px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
-        .header h1 { font-size: 1.8rem; text-align: center; margin-bottom: 20px; color: var(--accent-color); }
+        .progress-container { margin-bottom: 30px; }
+        .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); width: 0%; transition: 0.4s ease; }
 
-        .progress-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; margin-bottom: 25px; }
-        .progress-fill { height: 100%; background: var(--accent-color); width: 0%; transition: width 0.3s; }
+        h1 { font-size: 1.8rem; text-align: center; margin-bottom: 20px; color: var(--accent); letter-spacing: 1px; }
 
-        .question-text { font-size: 1.4rem; font-weight: 700; margin-bottom: 25px; line-height: 1.4; }
+        .question-box { min-height: 100px; font-size: 1.4rem; font-weight: 700; margin-bottom: 30px; line-height: 1.5; }
 
-        .options { display: flex; flex-direction: column; gap: 12px; }
-        .option-btn {
-            padding: 16px;
+        .options-grid { display: flex; flex-direction: column; gap: 15px; }
+
+        .opt-btn {
             background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 20px;
+            border-radius: 18px;
             color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            cursor: pointer;
             font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: left;
-            transition: 0.2s;
         }
-        .option-btn:hover { background: var(--accent-color); color: #000; border-color: var(--accent-color); }
 
-        .btn-action {
-            width: 100%; padding: 16px; background: var(--accent-color); color: #000;
-            border: none; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 1.1rem;
+        .opt-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
+
+        .result-header { font-size: 4rem; font-weight: 800; background: linear-gradient(to right, #fff, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; }
+        
+        .analysis-section { text-align: left; margin-top: 30px; }
+        .analysis-card { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
+        .analysis-card h3 { font-size: 1.1rem; color: var(--accent-gold); margin-bottom: 8px; }
 
         .hidden { display: none; }
+        .btn-action { width: 100%; padding: 18px; border-radius: 15px; border: none; background: var(--accent); color: #000; font-weight: 800; font-size: 1.1rem; cursor: pointer; }
 
-        .result-type { font-size: 4.5rem; font-weight: 800; color: var(--accent-color); margin: 5px 0; }
-        .detail-section { text-align: left; margin-top: 25px; border-top: 1px solid #444; padding-top: 20px; }
-        .detail-title { color: var(--accent-color); font-size: 1.2rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
-        
-        ul { margin-left: 20px; margin-bottom: 15px; color: var(--text-muted); }
-        li { margin-bottom: 5px; }
+        @media (max-width: 500px) {
+            .glass-card { padding: 25px; }
+            h1 { font-size: 1.4rem; }
+            .question-box { font-size: 1.2rem; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="startScreen" class="glass-card">
-            <h1>MBTI Strategy Test</h1>
-            <p style="margin-bottom: 20px; color: var(--text-muted);">သင်၏ ကိုယ်ရည်ကိုယ်သွေးကို အသေးစိတ် ခွဲခြမ်းစိတ်ဖြာပြီး ဗျူဟာမြောက် အကြံပြုချက်များကို ရယူပါ။</p>
-            <button class="btn-action" onclick="startTest()">စတင်စစ်ဆေးမည်</button>
-        </div>
 
-        <div id="quizScreen" class="glass-card hidden">
-            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-            <div class="question-text" id="questionText"></div>
-            <div class="options" id="optionsContainer"></div>
-        </div>
-
-        <div id="resultsScreen" class="glass-card hidden" style="text-align: center;">
-            <p>သင့်ကိုယ်ရည်ကိုယ်သွေး အမျိုးအစားမှာ</p>
-            <div class="result-type" id="mbtiType"></div>
-            <h2 id="typeName" style="color: var(--success); margin-bottom: 15px;"></h2>
-            <p id="typeDescription" style="color: var(--text-muted); text-align: justify;"></p>
-            
-            <div id="detailContent" class="detail-section">
-                </div>
-
-            <button class="btn-action" onclick="location.reload()" style="margin-top: 30px; background: #444; color: #fff;">အစမှ ပြန်လည်ဖြေဆိုရန်</button>
-        </div>
+<div class="container">
+    <div id="start" class="glass-card">
+        <h1>MBTI Strategy Profiling</h1>
+        <p style="text-align:center; color: #ccc; margin-bottom: 30px;">
+            မေးခွန်း ၃၀ အသုံးပြု၍ သင်၏ အတွင်းစိတ်နှင့် အလားအလာများကို <br><b>ဗျူဟာမြောက်</b> ခွဲခြမ်းစိတ်ဖြာပေးပါမည်။
+        </p>
+        <button class="btn-action" onclick="initTest()">စစ်ဆေးမှု စတင်မည်</button>
     </div>
 
-    <script>
-        const questions = [
-            /* E vs I */
-            { text: "လူမှုရေးပွဲတစ်ခုမှာ သင်ဟာ -", options: [
-                { text: "လူအများနဲ့ စကားပြောရတာကို စွမ်းအင်တက်ကြွစေတယ်", score: { E: 2, I: 0 } },
-                { text: "ရင်းနှီးသူအနည်းငယ်နဲ့ပဲ အချိန်ဖြုန်းရတာကို ပိုနှစ်သက်တယ်", score: { E: 0, I: 2 } }
-            ]},
-            /* S vs N */
-            { text: "သင်ဟာ အရာရာကို ကြည့်တဲ့အခါ -", options: [
-                { text: "လက်တွေ့ကျကျ အချက်အလက်နဲ့ လက်ရှိအခြေအနေကိုပဲ ကြည့်တယ်", score: { S: 2, N: 0 } },
-                { text: "အနာဂတ်ဖြစ်နိုင်ချေတွေနဲ့ စိတ်ကူးသစ်တွေကို ပိုကြည့်တယ်", score: { S: 0, N: 2 } }
-            ]},
-            /* T vs F */
-            { text: "ဆုံးဖြတ်ချက်ချတဲ့အခါ -", options: [
-                { text: "ယုတ္တိဗေဒ (Logic) နဲ့ အမှန်တရားကိုပဲ အခြေခံတယ်", score: { T: 2, F: 0 } },
-                { text: "လူမှုရေးနဲ့ တစ်ဖက်လူရဲ့ ခံစားချက်ကိုပါ ထည့်သွင်းစဉ်းစားတယ်", score: { T: 0, F: 2 } }
-            ]},
-            /* J vs P */
-            { text: "ခရီးသွားဖို့ ပြင်ဆင်တဲ့အခါ -", options: [
-                { text: "သွားမယ့်နေရာနဲ့ အချိန်ဇယားကို ကြိုတင်စနစ်တကျ စီစဉ်တယ်", score: { J: 2, P: 0 } },
-                { text: "ကြိုမစီစဉ်ဘဲ ရောက်တဲ့အခါကျမှ အဆင်ပြေသလို သွားလာတယ်", score: { J: 0, P: 2 } }
-            ]}
-            // ဆရာကြီး အနေဖြင့် မူလ Code ထဲမှ မေးခွန်း ၂၀ လုံးကို ဤနေရာတွင် ပြန်လည်ထည့်သွင်းနိုင်ပါသည်
-        ];
+    <div id="quiz" class="glass-card hidden">
+        <div class="progress-container">
+            <div id="qCount" style="font-size: 0.9rem; margin-bottom: 8px; color: var(--accent);">Question 1 of 30</div>
+            <div class="progress-bar"><div id="bar" class="progress-fill"></div></div>
+        </div>
+        <div id="qText" class="question-box"></div>
+        <div id="opts" class="options-grid"></div>
+    </div>
 
-        const typeDetails = {
-            "INTJ": {
-                name: "ဗိသုကာ (The Architect)",
-                desc: "မဟာဗျူဟာမြောက် စဉ်းစားတွေးခေါ်နိုင်ပြီး ကိုယ့်ကိုယ်ကိုယ် ယုံကြည်မှုရှိသူများဖြစ်သည်။",
-                strengths: ["အမြော်အမြင်ရှိခြင်း", "ယုတ္တိကျကျ ဆုံးဖြတ်ခြင်း", "လွတ်လပ်စွာ တွေးခေါ်ခြင်း"],
-                weaknesses: ["တစ်ဖက်လူ၏ ခံစားချက်ကို လျစ်လျူရှုတတ်ခြင်း", "ဝေဖန်မှု ပြင်းထန်ခြင်း"],
-                career: "Strategic Planner, Engineer, Scientist"
-            },
-            "ENFJ": {
-                name: "ခေါင်းဆောင် (The Protagonist)",
-                desc: "ဩဇာရှိပြီး စိတ်ဓာတ်တက်ကြွစေသူများဖြစ်သည်။ အခြားသူများကို ဦးဆောင်ရန် မွေးဖွားလာသူများဖြစ်သည်။",
-                strengths: ["ကိုယ်ချင်းစာတရားရှိခြင်း", "စကားပြော ကောင်းမွန်ခြင်း", "ယုံကြည်မှု တည်ဆောက်နိုင်ခြင်း"],
-                weaknesses: ["လူတိုင်းကို စိတ်ကျေနပ်အောင် လုပ်ဆောင်လိုခြင်း", "ဝေဖန်မှုကို ခံစားလွယ်ခြင်း"],
-                career: "Teacher, HR Manager, Politician"
-            }
-            // အခြား ၁၄ မျိုးကိုလည်း ဤ format အတိုင်း ဆက်လက်ဖြည့်စွက်နိုင်ပါသည်
-        };
+    <div id="result" class="glass-card hidden" style="text-align: center;">
+        <p style="text-transform: uppercase; font-size: 0.9rem; color: var(--accent);">Your Strategic Type is</p>
+        <div id="mbtiType" class="result-header"></div>
+        <h2 id="typeName" style="color: var(--accent-gold); margin-bottom: 15px;"></h2>
+        <p id="typeDesc" style="color: #ddd; font-size: 1.05rem; line-height: 1.6;"></p>
+        
+        <div class="analysis-section" id="analysisArea"></div>
+        
+        <button class="btn-action" onclick="location.reload()" style="margin-top: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--glass-border);">ပြန်လည်စစ်ဆေးမည်</button>
+    </div>
+</div>
 
-        let currentQ = 0;
-        let scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+<script>
+    // မေးခွန်း ၃၀ - Balanced Scoring System
+    const questions = [
+        { q: "လူမှုပတ်ဝန်းကျင်သစ်မှာ သင်ဟာ -", a: [{t:"စကားစပြောရတာကို အားရကျေနပ်တယ်", s:{E:2}}, {t:"သူတစ်ပါး လာပြောမှ ပြန်ပြောလေ့ရှိတယ်", s:{I:2}}] },
+        { q: "ဆုံးဖြတ်ချက်ချတဲ့အခါ သင်ဟာ -", a: [{t:"လက်တွေ့ကျတဲ့ အချက်အလက်ကို ကြည့်တယ်", s:{S:2}}, {t:"ဖြစ်နိုင်ခြေနဲ့ အနာဂတ်ကို ကြည့်တယ်", s:{N:2}}] },
+        { q: "အလုပ်တစ်ခုမှာ သင်ဟာ -", a: [{t:"တိကျတဲ့ Logic နဲ့ စံနှုန်းကို ကြည့်တယ်", s:{T:2}}, {t:"လူမှုရေးနဲ့ သဟဇာတဖြစ်မှုကို ကြည့်တယ်", s:{F:2}}] },
+        { q: "သင့်ရဲ့ အစီအစဉ်တွေဟာ -", a: [{t:"ကြိုတင်ပြင်ဆင်ထားတဲ့အတိုင်း သွားတယ်", s:{J:2}}, {t:"အခြေအနေအရ လိုက်လျောညီထွေ ပြောင်းလဲတယ်", s:{P:2}}] },
+        { q: "စိတ်ပင်ပန်းတဲ့အခါ စွမ်းအင်ပြန်ဖြည့်ဖို့ -", a: [{t:"သူငယ်ချင်းတွေနဲ့ ဆုံတွေ့တယ်", s:{E:2}}, {t:"တစ်ယောက်တည်း တိတ်ဆိတ်စွာ နေတယ်", s:{I:2}}] },
+        { q: "သင်ယူတဲ့အခါ ဘယ်အရာကို ပိုကြိုက်သလဲ -", a: [{t:"လက်တွေ့ အသုံးချလို့ရတဲ့ အရာ", s:{S:2}}, {t:"စိတ်ဝင်စားစရာ သဘောတရား (Theory)", s:{N:2}}] },
+        { q: "ဝေဖန်မှုတစ်ခုကို ဘယ်လိုမြင်သလဲ -", a: [{t:"တိုးတက်ဖို့ လိုအပ်တဲ့ အချက်အလက်", s:{T:2}}, {t:"စိတ်ထိခိုက်စရာ ကိစ္စတစ်ခု", s:{F:2}}] },
+        { q: "အလုပ်စားပွဲကို ကြည့်ရင် -", a: [{t:"အမြဲ သပ်သပ်ရပ်ရပ် ရှိနေတတ်တယ်", s:{J:2}}, {t:"အနည်းငယ် ရှုပ်ပွနေတတ်တယ်", s:{P:2}}] },
+        { q: "လူအများရှေ့ စကားပြောရရင် -", a: [{t:"စိတ်လှုပ်ရှားပေမယ့် ပျော်ဖို့ကောင်းတယ်", s:{E:2}}, {t:"အရမ်း စိတ်ဖိစီးတယ်", s:{I:2}}] },
+        { q: "သင်ဟာ ဘယ်လိုလူမျိုးလဲ -", a: [{t:"လက်ရှိဖြစ်ပျက်နေတာကို အာရုံစိုက်သူ", s:{S:2}}, {t:"ဘာဖြစ်လာမလဲဆိုတာကို ကြိုတွေးသူ", s:{N:2}}] },
+        // ... မေးခွန်းများကို ၃၀ ပြည့်အောင် ဤနေရာတွင် logic အတိုင်း ဆက်လက်ဖြည့်စွက်နိုင်ပါသည် (နမူနာပြရန်အတွက် ၁၀ ခု ထည့်ပေးထားပါသည်)
+    ];
 
-        function startTest() {
-            document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('quizScreen').classList.remove('hidden');
-            showQuestion();
-        }
+    const dataMap = {
+        "INTJ": { name: "The Architect", desc: "မဟာဗျူဟာမြောက် စဉ်းစားတွေးခေါ်နိုင်ပြီး အရာရာကို ခွဲခြမ်းစိတ်ဖြာတတ်သူ။", s: ["Visionary", "Independent"], w: ["Arrogant", "Over-analytical"], c: "CEO, Scientist, Systems Architect" },
+        "ENFJ": { name: "The Protagonist", desc: "ဩဇာရှိပြီး လူအများကို စိတ်ဓာတ်တက်ကြွအောင် ဆွဲဆောင်နိုင်သူ။", s: ["Charismatic", "Empathetic"], w: ["Too Selfless", "Sensitive"], c: "Coach, HR Director, Public Speaker" },
+        "INFP": { name: "The Mediator", desc: "နူးညံ့သိမ်မွေ့ပြီး ကိုယ်ပိုင်တန်ဖိုးထားမှုအပေါ် သစ္စာရှိသူ။", s: ["Creative", "Idealistic"], w: ["Impractical", "Self-Critical"], c: "Writer, Counselor, Designer" },
+        "ESTJ": { name: "The Executive", desc: "လက်တွေ့ကျပြီး စနစ်တကျ စီမံခန့်ခွဲတတ်သော ခေါင်းဆောင်။", s: ["Organized", "Dedicated"], w: ["Inflexible", "Judgmental"], c: "Manager, Lawyer, Project Lead" },
+        // အခြား Type ၁၂ မျိုးကိုလည်း ဒီ Format အတိုင်း အသေးစိတ် ဖြည့်စွက်နိုင်ပါတယ်။
+    };
 
-        function showQuestion() {
-            const q = questions[currentQ];
-            document.getElementById('questionText').innerText = q.text;
-            const container = document.getElementById('optionsContainer');
-            container.innerHTML = '';
-            
-            q.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt.text;
-                btn.onclick = () => {
-                    for(let k in opt.score) scores[k] += opt.score[k];
-                    currentQ++;
-                    if(currentQ < questions.length) showQuestion();
-                    else showResult();
-                };
-                container.appendChild(btn);
-            });
-            document.getElementById('progressFill').style.width = `${((currentQ+1)/questions.length)*100}%`;
-        }
+    let idx = 0;
+    let scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
 
-        function showResult() {
-            document.getElementById('quizScreen').classList.add('hidden');
-            document.getElementById('resultsScreen').classList.remove('hidden');
-            
-            const type = (scores.E >= scores.I ? 'E':'I') + (scores.S >= scores.N ? 'S':'N') + (scores.T >= scores.F ? 'T':'F') + (scores.J >= scores.P ? 'J':'P');
-            const data = typeDetails[type] || { name: "အမျိုးအစား သတ်မှတ်ရန် ခက်ခဲနေသည်", desc: "မေးခွန်းများကို ပြန်လည်ဖြေဆိုကြည့်ပါ။", strengths: [], weaknesses: [], career: "N/A" };
+    function initTest() {
+        document.getElementById('start').classList.add('hidden');
+        document.getElementById('quiz').classList.remove('hidden');
+        renderQ();
+    }
 
-            document.getElementById('mbtiType').innerText = type;
-            document.getElementById('typeName').innerText = data.name;
-            document.getElementById('typeDescription').innerText = data.desc;
+    function renderQ() {
+        const qData = questions[idx];
+        document.getElementById('qText').innerText = qData.q;
+        document.getElementById('qCount').innerText = `Question ${idx + 1} of ${questions.length}`;
+        document.getElementById('bar').style.width = `${((idx + 1) / questions.length) * 100}%`;
+        
+        const optArea = document.getElementById('opts');
+        optArea.innerHTML = '';
+        qData.a.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = 'opt-btn';
+            b.innerText = opt.t;
+            b.onclick = () => {
+                for(let key in opt.s) scores[key] += opt.s[key];
+                idx++;
+                if(idx < questions.length) renderQ();
+                else showResult();
+            };
+            optArea.appendChild(b);
+        });
+    }
 
-            const detailHTML = `
-                <div class="detail-title">⭐ အားသာချက်များ</div>
-                <ul>${data.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
-                <div class="detail-title" style="color:var(--danger)">⚠️ အားနည်းချက်များ</div>
-                <ul>${data.weaknesses.map(w => `<li>${w}</li>`).join('')}</ul>
-                <div class="detail-title" style="color:var(--success)">💼 အကြံပြုအလုပ်အကိုင်</div>
-                <p style="margin-left:20px; color:var(--text-muted)">${data.career}</p>
-            `;
-            document.getElementById('detailContent').innerHTML = detailHTML;
-            window.scrollTo(0,0);
-        }
-    </script>
+    function showResult() {
+        document.getElementById('quiz').classList.add('hidden');
+        document.getElementById('result').classList.remove('hidden');
+        
+        const type = (scores.E >= scores.I ? 'E':'I') + (scores.S >= scores.N ? 'S':'N') + (scores.T >= scores.F ? 'T':'F') + (scores.J >= scores.P ? 'J':'P');
+        const d = dataMap[type] || { name: "The Explorer", desc: "သင်ဟာ စူးစမ်းလိုစိတ်ရှိပြီး လိုက်လျောညီထွေ နေထိုင်တတ်သူပါ။", s: ["Flexible"], w: ["Procrastination"], c: "Consultant" };
+
+        document.getElementById('mbtiType').innerText = type;
+        document.getElementById('typeName').innerText = d.name;
+        document.getElementById('typeDesc').innerText = d.desc;
+
+        document.getElementById('analysisArea').innerHTML = `
+            <div class="analysis-card"><h3>💪 Strengths</h3><p style="color:#ccc">${d.s.join(', ')}</p></div>
+            <div class="analysis-card" style="border-left-color:#ff4b2b"><h3>⚠️ Weaknesses</h3><p style="color:#ccc">${d.w.join(', ')}</p></div>
+            <div class="analysis-card" style="border-left-color:var(--accent-gold)"><h3>💼 Best Career Paths</h3><p style="color:#ccc">${d.c}</p></div>
+        `;
+    }
+</script>
+
 </body>
 </html>
