@@ -4,115 +4,198 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MBTI Strategic Analysis Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.07);
-            --glass-border: rgba(255, 255, 255, 0.15);
-            --accent: #00d2ff;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --accent: #00f2ff;
+            --accent-glow: rgba(0, 242, 255, 0.4);
             --accent-gold: #ffd700;
             --text: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Padauk', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans Myanmar', 'Padauk', sans-serif; }
 
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            background: var(--bg-gradient);
             color: var(--text);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 15px;
+            padding: 20px;
             overflow-x: hidden;
+            position: relative;
         }
 
-        .container { width: 100%; max-width: 750px; }
+        /* Background decoration */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            filter: blur(150px);
+            opacity: 0.2;
+            top: -50px;
+            left: -50px;
+            z-index: -1;
+            border-radius: 50%;
+        }
+
+        .container { width: 100%; max-width: 700px; position: relative; z-index: 1; }
 
         .glass-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 30px;
+            border-radius: 24px;
             padding: 40px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: transform 0.3s ease;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .progress-container { margin-bottom: 30px; }
-        .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #00d2ff, #3a7bd5); width: 0%; transition: 0.4s ease; }
+        .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; position: relative; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #3a7bd5); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px var(--accent-glow); }
 
-        h1 { font-size: 1.8rem; text-align: center; margin-bottom: 20px; color: var(--accent); letter-spacing: 1px; }
+        h1 { font-size: 2rem; text-align: center; margin-bottom: 15px; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
 
-        .question-box { min-height: 100px; font-size: 1.4rem; font-weight: 700; margin-bottom: 30px; line-height: 1.5; }
+        .question-box { min-height: 120px; font-size: 1.5rem; font-weight: 700; margin-bottom: 30px; line-height: 1.6; display: flex; align-items: center; justify-content: center; text-align: center; }
 
         .options-grid { display: flex; flex-direction: column; gap: 15px; }
 
         .opt-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
-            padding: 20px;
-            border-radius: 18px;
+            padding: 20px 25px;
+            border-radius: 16px;
             color: #fff;
             font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: left;
+            position: relative;
+            overflow: hidden;
         }
 
         .opt-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border-color: var(--accent);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .result-header { font-size: 4rem; font-weight: 800; background: linear-gradient(to right, #fff, #00d2ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 10px 0; }
-        
+        .opt-btn::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; height: 100%; width: 0;
+            background: var(--accent);
+            opacity: 0.1;
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+        .opt-btn:hover::after { width: 100%; }
+
+        .result-header {
+            font-size: 5rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 10px 0;
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
         .analysis-section { text-align: left; margin-top: 30px; }
-        .analysis-card { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 20px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
-        .analysis-card h3 { font-size: 1.1rem; color: var(--accent-gold); margin-bottom: 8px; }
+        .analysis-card {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid var(--accent);
+            transition: transform 0.3s;
+        }
+        .analysis-card:hover { transform: scale(1.02); }
+        .analysis-card h3 { font-size: 1.1rem; color: var(--accent-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+
+        .trait-bar-container { margin-bottom: 15px; }
+        .trait-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; color: #ccc; }
+        .trait-track { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; position: relative; }
+        .trait-fill { height: 100%; background: #fff; width: 0%; transition: width 1s ease-out; }
+        .trait-center { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.3); }
 
         .hidden { display: none; }
-        .btn-action { width: 100%; padding: 18px; border-radius: 15px; border: none; background: var(--accent); color: #000; font-weight: 800; font-size: 1.1rem; cursor: pointer; }
+        .btn-action {
+            width: 100%;
+            padding: 18px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(90deg, var(--accent), #3a7bd5);
+            color: #000;
+            font-weight: 800;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 0 15px var(--accent-glow);
+            transition: transform 0.2s;
+        }
+        .btn-action:hover { transform: scale(1.02); }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--glass-border); box-shadow: none; margin-top: 15px; }
 
         @media (max-width: 500px) {
             .glass-card { padding: 25px; }
-            h1 { font-size: 1.4rem; }
-            .question-box { font-size: 1.2rem; }
+            h1 { font-size: 1.6rem; }
+            .question-box { font-size: 1.3rem; }
+            .result-header { font-size: 3.5rem; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Start Screen -->
     <div id="start" class="glass-card">
         <h1>MBTI Strategy Profiling</h1>
-        <p style="text-align:center; color: #ccc; margin-bottom: 30px;">
-            မေးခွန်း ၃၀ အသုံးပြု၍ သင်၏ အတွင်းစိတ်နှင့် အလားအလာများကို <br><b>ဗျူဟာမြောက်</b> ခွဲခြမ်းစိတ်ဖြာပေးပါမည်။
+        <p style="text-align:center; color: #ddd; margin-bottom: 30px; line-height: 1.6;">
+            မေးခွန်း ၃၀ အသုံးပြု၍ သင်၏ အတွင်းစိတ်နှင့် အလားအလာများကို <br>
+            <span style="color:var(--accent); font-weight:bold;">ဗျူဟာမြောက်</span> ခွဲခြမ်းစိတ်ဖြာပေးပါမည်။
         </p>
         <button class="btn-action" onclick="initTest()">စစ်ဆေးမှု စတင်မည်</button>
     </div>
 
+    <!-- Quiz Screen -->
     <div id="quiz" class="glass-card hidden">
         <div class="progress-container">
-            <div id="qCount" style="font-size: 0.9rem; margin-bottom: 8px; color: var(--accent);">Question 1 of 30</div>
+            <div id="qCount" style="font-size: 0.9rem; margin-bottom: 8px; color: var(--accent); font-weight:bold;">Question 1 of 30</div>
             <div class="progress-bar"><div id="bar" class="progress-fill"></div></div>
         </div>
         <div id="qText" class="question-box"></div>
         <div id="opts" class="options-grid"></div>
     </div>
 
+    <!-- Result Screen -->
     <div id="result" class="glass-card hidden" style="text-align: center;">
-        <p style="text-transform: uppercase; font-size: 0.9rem; color: var(--accent);">Your Strategic Type is</p>
+        <p style="text-transform: uppercase; font-size: 0.9rem; color: var(--accent); letter-spacing: 2px;">Your Strategic Type</p>
         <div id="mbtiType" class="result-header"></div>
-        <h2 id="typeName" style="color: var(--accent-gold); margin-bottom: 15px;"></h2>
-        <p id="typeDesc" style="color: #ddd; font-size: 1.05rem; line-height: 1.6;"></p>
-        
+        <h2 id="typeName" style="color: var(--accent-gold); margin-bottom: 15px; font-weight: 400;"></h2>
+        <p id="typeDesc" style="color: #ddd; font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px;"></p>
+
+        <!-- Trait Breakdown -->
+        <div id="traitBreakdown" style="margin-bottom: 30px; text-align: left; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 16px;"></div>
+
         <div class="analysis-section" id="analysisArea"></div>
-        
-        <button class="btn-action" onclick="location.reload()" style="margin-top: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--glass-border);">ပြန်လည်စစ်ဆေးမည်</button>
+
+        <button class="btn-action" onclick="location.reload()">ပြန်လည်စစ်ဆေးမည်</button>
     </div>
 </div>
 
@@ -161,7 +244,7 @@
         "ENFP": { name: "The Campaigner (လှုပ်ရှားသူ)", desc: "တက်ကြွလန်းဆန်းပြီး ပတ်ဝန်းကျင်ရှိ လူများကို ပျော်ရွှင်အောင် လုပ်ပေးနိုင်သူ။", s: ["စိတ်ကူးစိတ်သန်းကောင်းခြင်း", "လူမှုဆက်ဆံရေး"], w: ["အာရုံစူးစိုက်မှုနည်းခြင်း", "ပျင်းလွယ်ခြင်း"], c: "Journalist, PR Specialist, Creative Director" },
         "ISTJ": { name: "The Inspector (စစ်ဆေးသူ)", desc: "တာဝန်ယူမှု အပြည့်ရှိပြီး အချက်အလက်နှင့် စည်းကမ်းကို အလေးထားသူ။", s: ["ရိုးသားခြင်း", "တည်ငြိမ်ခြင်း", "တိကျခြင်း"], w: ["ပြောင်းလဲမှုကို ကြောက်ခြင်း", "ခေါင်းမာခြင်း"], c: "Accountant, Military Officer, Auditor" },
         "ISFJ": { name: "The Defender (အကာအကွယ်ပေးသူ)", desc: "တိတ်ဆိတ်စွာဖြင့် မိမိပတ်ဝန်းကျင်ရှိ လူများကို ဂရုစိုက် စောင့်ရှောက်တတ်သူ။", s: ["စိတ်ချရခြင်း", "စိတ်ရှည်ခြင်း"], w: ["ကိုယ့်ကိုယ်ကိုယ် ဂရုစိုက်မှုနည်းခြင်း"], c: "Nurse, Customer Support, Administrator" },
-        "ESTJ": { name: "The Executive (စီမံခန့်ခွဲသူ)", desc: "လက်တွေ့ကျပြီး စနစ်တကျ စီမံခန့်ခွဲတတ်သော ခေါင်းဆောင်။", s: ["စည်းကမ်းရှိခြင်း", "ထိရောက်ခြင်း"], w: ["ဝေဖန်မှုလက်ခံရန် ခက်ခဲခြင်း", "တင်းကျပ်လွန်းခြင်း"], c: "Manager, Financial Controller, Project Lead" },
+        "ESTJ": { name: "The Executive (စီမံခန့်ခွဲသူ)", desc: "လက်တွေ့ကျပြီး စနစ်တကျ စီမခန့်ခွဲတတ်သော ခေါင်းဆောင်။", s: ["စည်းကမ်းရှိခြင်း", "ထိရောက်ခြင်း"], w: ["ဝေဖန်မှုလက်ခံရန် ခက်ခဲခြင်း", "တင်းကျပ်လွန်းခြင်း"], c: "Manager, Financial Controller, Project Lead" },
         "ESFJ": { name: "The Consul (အကြံပေး)", desc: "လူမှုဆက်ဆံရေး ကောင်းမွန်ပြီး အခြားသူများကို ကူညီပေးရသည်ကို ပျော်ရွှင်သူ။", s: ["နွေးထွေးခြင်း", "တာဝန်သိခြင်း"], w: ["သူတစ်ပါးအမြင်ကို အလွန်ဂရုစိုက်ခြင်း"], c: "Event Planner, Receptionist, Sales" },
         "ISTP": { name: "The Virtuoso (ကျွမ်းကျင်ပညာရှင်)", desc: "လက်တွေ့ အလုပ်လုပ်ရသည်ကို နှစ်သက်ပြီး နည်းပညာပိုင်းတွင် ကျွမ်းကျင်သူ။", s: ["လက်တွေ့ကျခြင်း", "အခက်အခဲဖြေရှင်းနိုင်ခြင်း"], w: ["ခံစားချက်ဖော်ပြရန် ခက်ခြင်း"], c: "Engineer, Mechanic, Forensic Scientist" },
         "ISFP": { name: "The Adventurer (စွန့်စားသူ)", desc: "လွတ်လပ်မှုကို မြတ်နိုးပြီး အနုပညာဆန်ဆန် နေထိုင်တတ်သူ။", s: ["အနုပညာမျက်စိရှိခြင်း", "သဘောထားပြည့်ခြင်း"], w: ["ကြိုတင်စီစဉ်မှုနည်းခြင်း", "စိတ်ဖိစီးလွယ်ခြင်း"], c: "Photographer, Musician, Interior Designer" },
@@ -171,6 +254,7 @@
 
     let idx = 0;
     let scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
+    const totalPoints = questions.length * 2; // Max possible points per category
 
     function initTest() {
         document.getElementById('start').classList.add('hidden');
@@ -183,19 +267,23 @@
         document.getElementById('qText').innerText = qData.q;
         document.getElementById('qCount').innerText = `Question ${idx + 1} of ${questions.length}`;
         document.getElementById('bar').style.width = `${((idx + 1) / questions.length) * 100}%`;
-        
+
         const optArea = document.getElementById('opts');
         optArea.innerHTML = '';
-        qData.a.forEach(opt => {
+
+        // Add animation delay for buttons
+        qData.a.forEach((opt, i) => {
             const b = document.createElement('button');
             b.className = 'opt-btn';
             b.innerText = opt.t;
+            b.style.animation = `fadeIn 0.5s ease-out ${i * 0.1}s forwards`;
+            b.style.opacity = '0';
             b.onclick = () => {
                 for(let key in opt.s) scores[key] += opt.s[key];
                 idx++;
                 if(idx < questions.length) {
                     renderQ();
-                    window.scrollTo(0,0);
+                    window.scrollTo({top: 0, behavior: 'smooth'});
                 } else showResult();
             };
             optArea.appendChild(b);
@@ -205,22 +293,57 @@
     function showResult() {
         document.getElementById('quiz').classList.add('hidden');
         document.getElementById('result').classList.remove('hidden');
-        
-        const type = (scores.E >= scores.I ? 'E':'I') + (scores.S >= scores.N ? 'S':'N') + (scores.T >= scores.F ? 'T':'F') + (scores.J >= scores.P ? 'J':'P');
+
+        // Calculate Type
+        const type = (scores.E >= scores.I ? 'E':'I') +
+                     (scores.S >= scores.N ? 'S':'N') +
+                     (scores.T >= scores.F ? 'T':'F') +
+                     (scores.J >= scores.P ? 'J':'P');
+
         const d = dataMap[type] || dataMap["INTJ"];
 
         document.getElementById('mbtiType').innerText = type;
         document.getElementById('typeName').innerText = d.name;
         document.getElementById('typeDesc').innerText = d.desc;
 
+        // Generate Trait Bars
+        const breakdownHTML = `
+            <div class="trait-bar-container">
+                <div class="trait-label"><span>Extrovert (E)</span><span>Introvert (I)</span></div>
+                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.E / (scores.E + scores.I)) * 100}%"></div></div>
+            </div>
+            <div class="trait-bar-container">
+                <div class="trait-label"><span>Sensing (S)</span><span>Intuition (N)</span></div>
+                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.S / (scores.S + scores.N)) * 100}%"></div></div>
+            </div>
+            <div class="trait-bar-container">
+                <div class="trait-label"><span>Thinking (T)</span><span>Feeling (F)</span></div>
+                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.T / (scores.T + scores.F)) * 100}%"></div></div>
+            </div>
+            <div class="trait-bar-container">
+                <div class="trait-label"><span>Judging (J)</span><span>Perceiving (P)</span></div>
+                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.J / (scores.J + scores.P)) * 100}%"></div></div>
+            </div>
+        `;
+        document.getElementById('traitBreakdown').innerHTML = breakdownHTML;
+
+        // Trigger reflow for animation
+        setTimeout(() => {
+            document.querySelectorAll('.trait-fill').forEach(el => {
+                // Force reflow to trigger transition
+                el.style.width = el.style.width;
+            });
+        }, 100);
+
         document.getElementById('analysisArea').innerHTML = `
             <div class="analysis-card"><h3>💪 အားသာချက်များ</h3><p style="color:#ccc">${d.s.join(', ')}</p></div>
             <div class="analysis-card" style="border-left-color:#ff4b2b"><h3>⚠️ သတိပြုရန်အချက်များ</h3><p style="color:#ccc">${d.w.join(', ')}</p></div>
             <div class="analysis-card" style="border-left-color:var(--accent-gold)"><h3>💼 သင့်လျော်သော အလုပ်အကိုင်များ</h3><p style="color:#ccc">${d.c}</p></div>
         `;
-        window.scrollTo(0,0);
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }
 </script>
 
 </body>
 </html>
+```
