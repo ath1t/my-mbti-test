@@ -1,348 +1,906 @@
 <!DOCTYPE html>
-<html lang="my">
+<html lang="my" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MBTI Strategic Analysis Tool</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@300;400;700&family=Padauk:wght@400;700&display=swap" rel="stylesheet">
+    <title>Personality Type Explorer | MBTI Assessment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Padauk:wght@400;700&family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --accent: #00f2ff;
-            --accent-glow: rgba(0, 242, 255, 0.4);
-            --accent-gold: #ffd700;
-            --text: #ffffff;
-            --bg-gradient: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            --primary-bg: #0a0a14;
+            --card-bg: rgba(20, 20, 35, 0.95);
+            --surface: rgba(255,255,255,0.05);
+            --surface-hover: rgba(255,255,255,0.09);
+            --accent: #8b5cf6;
+            --accent-2: #7c3aed;
+            --accent-light: #a78bfa;
+            --accent-dark: #6d28d9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-sub: #cbd5e1;
+            --border: rgba(255,255,255,0.1);
+            --border-accent: rgba(139, 92, 246, 0.4);
+            --radius: 24px;
+            --radius-sm: 16px;
+            --radius-lg: 32px;
+            --shadow: 0 20px 50px rgba(0,0,0,0.4);
+            --glow: 0 0 50px rgba(139, 92, 246, 0.2);
+            --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+            --gradient: linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9);
+        }
+        [data-theme="light"] {
+            --primary-bg: #f5f7ff;
+            --card-bg: rgba(255,255,255,0.98);
+            --surface: rgba(0,0,0,0.03);
+            --surface-hover: rgba(0,0,0,0.07);
+            --accent: #7c3aed;
+            --accent-2: #6d28d9;
+            --accent-light: #8b5cf6;
+            --accent-dark: #5b21b6;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-sub: #475569;
+            --border: rgba(0,0,0,0.08);
+            --border-accent: rgba(124, 58, 237, 0.3);
+            --shadow: 0 20px 50px rgba(0,0,0,0.08);
+            --glow: 0 0 50px rgba(124, 58, 237, 0.1);
+            --gradient: linear-gradient(135deg, #7c3aed, #6d28d9, #5b21b6);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Noto Sans Myanmar', 'Padauk', sans-serif; }
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
         body {
             min-height: 100vh;
-            background: var(--bg-gradient);
-            color: var(--text);
+            background: var(--primary-bg);
+            color: var(--text-main);
             display: flex;
             justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
+            align-items: flex-start;
+            padding: 24px 20px 60px;
+            font-family: 'DM Sans', 'Padauk', 'Sarabun', sans-serif;
+            transition: background var(--transition), color var(--transition);
             position: relative;
+            overflow-x: hidden;
+            line-height: 1.6;
         }
 
-        /* Background decoration */
+        body::before, body::after {
+            content:'';
+            position:fixed;
+            pointer-events:none;
+            z-index:0;
+            filter: blur(80px);
+            opacity: 0.5;
+        }
         body::before {
-            content: '';
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: var(--accent);
-            filter: blur(150px);
-            opacity: 0.2;
-            top: -50px;
-            left: -50px;
-            z-index: -1;
-            border-radius: 50%;
+            width:600px; height:600px;
+            top:-200px; right:-200px;
+            background: radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%);
+        }
+        body::after {
+            width:500px; height:500px;
+            bottom:-150px; left:-150px;
+            background: radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 70%);
+        }
+        [data-theme="light"] body::before { background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%); }
+        [data-theme="light"] body::after  { background: radial-gradient(circle, rgba(109,40,217,0.1) 0%, transparent 70%); }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            position: relative;
+            z-index: 1;
         }
 
-        .container { width: 100%; max-width: 700px; position: relative; z-index: 1; }
-
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            padding: 40px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            transition: transform 0.3s ease;
-            animation: fadeIn 0.6s ease-out forwards;
+        /* TOP BAR */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            gap: 16px;
+            flex-wrap: wrap;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .progress-container { margin-bottom: 30px; }
-        .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; position: relative; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #3a7bd5); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px var(--accent-glow); }
-
-        h1 { font-size: 2rem; text-align: center; margin-bottom: 15px; color: var(--accent); text-shadow: 0 0 10px var(--accent-glow); }
-
-        .question-box { min-height: 120px; font-size: 1.5rem; font-weight: 700; margin-bottom: 30px; line-height: 1.6; display: flex; align-items: center; justify-content: center; text-align: center; }
-
-        .options-grid { display: flex; flex-direction: column; gap: 15px; }
-
-        .opt-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            padding: 20px 25px;
-            border-radius: 16px;
-            color: #fff;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
             font-size: 1.1rem;
+            color: var(--text-main);
+        }
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .lang-pills {
+            display: flex;
+            gap: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 6px;
+            backdrop-filter: blur(10px);
+        }
+        .lang-btn {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: none;
+            background: transparent;
+            color: var(--text-sub);
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: left;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.03em;
+            transition: all var(--transition);
+            font-family: inherit;
+        }
+        .lang-btn.active {
+            background: var(--gradient);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+        .lang-btn:not(.active):hover { color: var(--text-main); background: var(--surface-hover); }
+
+        .theme-toggle {
+            width: 44px; height: 44px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--text-main);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all var(--transition);
+            flex-shrink: 0;
+            backdrop-filter: blur(10px);
+        }
+        .theme-toggle:hover { border-color: var(--border-accent); box-shadow: var(--glow); transform: rotate(15deg); }
+
+        /* CARDS */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 52px 48px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            transition: opacity 0.6s ease, transform 0.6s ease;
             position: relative;
             overflow: hidden;
         }
-
-        .opt-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: var(--accent);
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .opt-btn::after {
+        .glass-card::before {
             content: '';
             position: absolute;
-            left: 0; top: 0; height: 100%; width: 0;
-            background: var(--accent);
-            opacity: 0.1;
-            transition: width 0.3s ease;
-            z-index: -1;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: var(--radius) var(--radius) 0 0;
         }
-        .opt-btn:hover::after { width: 100%; }
+        .glass-card.visible { opacity: 1; transform: translateY(0) scale(1); }
+        .hidden { display: none !important; }
 
-        .result-header {
-            font-size: 5rem;
+        /* START SCREEN */
+        .start-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border-accent);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-light);
+            margin-bottom: 24px;
+        }
+        .start-badge .dot { 
+            width:8px; height:8px; 
+            border-radius:50%; 
+            background:var(--accent-light); 
+            animation: pulse-dot 2s infinite; 
+        }
+        @keyframes pulse-dot { 
+            0%,100%{opacity:1;transform:scale(1)} 
+            50%{opacity:0.7;transform:scale(0.8)} 
+        }
+
+        #titleText {
+            font-family: 'Playfair Display', 'Padauk', serif;
+            font-size: 3.2rem;
             font-weight: 900;
-            background: linear-gradient(to right, #fff, var(--accent));
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin: 10px 0;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        #welcomeText {
+            color: var(--text-sub);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .stat-pill {
+            flex: 1;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px 16px;
+            text-align: center;
+            transition: all var(--transition);
+        }
+        .stat-pill:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-accent);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .stat-pill .stat-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+        .stat-pill .stat-label { 
+            font-size: 0.8rem; 
+            color: var(--text-muted); 
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* PROGRESS */
+        .progress-wrap { margin-bottom: 32px; }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .progress-label { 
+            font-size: 0.8rem; 
+            color: var(--text-muted); 
+            font-weight: 600; 
+            letter-spacing: 0.05em; 
+            text-transform: uppercase; 
+        }
+        .progress-perc-text { 
+            font-size: 0.9rem; 
+            font-weight: 800; 
+            color: var(--accent); 
+        }
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: var(--surface);
+            border-radius: 99px;
+            overflow: hidden;
+            position: relative;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border-radius: 99px;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* QUESTION */
+        .q-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .q-badge {
+            background: var(--gradient);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 6px 16px;
+            border-radius: 99px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+        .q-category-tag {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: var(--surface);
+            padding: 4px 12px;
+            border-radius: 50px;
+        }
+
+        #questionText {
+            font-family: 'Playfair Display', 'Padauk', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.5;
+            margin-bottom: 36px;
+            color: var(--text-main);
+        }
+
+        .options { display: flex; flex-direction: column; gap: 16px; }
+        .option-btn {
+            padding: 22px 24px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-main);
+            text-align: left;
+            cursor: pointer;
+            font-size: 1.05rem;
+            font-family: inherit;
+            font-weight: 400;
+            line-height: 1.6;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .option-btn::before {
+            content:'';
+            position:absolute;
+            left:0; top:0;
+            width:4px; height:100%;
+            background: var(--gradient);
+            transform: scaleY(0);
+            transition: transform 0.25s ease;
+            border-radius: 4px 0 0 4px;
+        }
+        .option-btn:hover {
+            border-color: var(--border-accent);
+            background: var(--surface-hover);
+            transform: translateX(6px);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.15);
+        }
+        .option-btn:hover::before { transform: scaleY(1); }
+        .option-btn:active { transform: translateX(3px) scale(0.99); }
+
+        /* RESULT SCREEN */
+        .result-header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            position: relative;
+        }
+        #resultIntro { 
+            font-size: 0.95rem; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            font-weight: 700; 
+            margin-bottom: 16px; 
+        }
+
+        #mbtiType {
+            font-family: 'Playfair Display', serif;
+            font-size: 6rem;
+            font-weight: 900;
+            letter-spacing: 10px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: popIn 0.8s cubic-bezier(0.34,1.56,0.64,1);
             line-height: 1;
-            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+            margin: 10px 0;
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+        @keyframes popIn { 
+            0%{opacity:0;transform:scale(0.5) rotate(-5deg)} 
+            80%{transform:scale(1.08) rotate(2deg)} 
+            100%{opacity:1;transform:scale(1) rotate(0)} 
         }
 
-        .analysis-section { text-align: left; margin-top: 30px; }
-        .analysis-card {
-            background: rgba(0,0,0,0.2);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 5px solid var(--accent);
-            transition: transform 0.3s;
+        #typeName {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 12px;
         }
-        .analysis-card:hover { transform: scale(1.02); }
-        .analysis-card h3 { font-size: 1.1rem; color: var(--accent-gold); margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
 
-        .trait-bar-container { margin-bottom: 15px; }
-        .trait-label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 5px; color: #ccc; }
-        .trait-track { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; position: relative; }
-        .trait-fill { height: 100%; background: #fff; width: 0%; transition: width 1s ease-out; }
-        .trait-center { position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.3); }
+        .result-divider {
+            width: 80px; height: 4px;
+            background: var(--gradient);
+            border-radius: 99px;
+            margin: 24px auto 32px;
+        }
 
-        .hidden { display: none; }
+        #typeDesc {
+            font-size: 1.1rem;
+            line-height: 1.9;
+            color: var(--text-sub);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .traits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 40px;
+        }
+        .trait-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 20px 18px;
+            transition: all var(--transition);
+        }
+        .trait-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-accent);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .trait-card .trait-icon { 
+            font-size: 1.5rem; 
+            margin-bottom: 10px; 
+            color: var(--accent);
+        }
+        .trait-card .trait-label { 
+            font-weight: 700; 
+            color: var(--text-main); 
+            font-size: 0.9rem; 
+            line-height: 1.4;
+        }
+
+        /* BUTTONS */
         .btn-action {
             width: 100%;
-            padding: 18px;
-            border-radius: 16px;
+            padding: 20px;
+            background: var(--gradient);
+            color: #fff;
             border: none;
-            background: linear-gradient(90deg, var(--accent), #3a7bd5);
-            color: #000;
-            font-weight: 800;
-            font-size: 1.1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
             cursor: pointer;
-            box-shadow: 0 0 15px var(--accent-glow);
-            transition: transform 0.2s;
+            font-size: 1.1rem;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+            transition: all var(--transition);
+            box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-        .btn-action:hover { transform: scale(1.02); }
-        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--glass-border); box-shadow: none; margin-top: 15px; }
+        .btn-action::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transform: translateX(-100%);
+        }
+        .btn-action:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(139, 92, 246, 0.5);
+            filter: brightness(1.1);
+        }
+        .btn-action:hover::after {
+            animation: shimmer-btn 1.5s infinite;
+        }
+        .btn-action:active { transform: translateY(0); }
 
-        @media (max-width: 500px) {
-            .glass-card { padding: 25px; }
-            h1 { font-size: 1.6rem; }
-            .question-box { font-size: 1.3rem; }
-            .result-header { font-size: 3.5rem; }
+        @keyframes shimmer-btn {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 18px;
+            background: transparent;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            font-family: inherit;
+            margin-top: 14px;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-secondary:hover { 
+            border-color: var(--border-accent); 
+            color: var(--accent); 
+            background: var(--surface); 
+            transform: translateY(-2px);
+        }
+
+        /* FOOTER */
+        .footer-note {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        @media (max-width: 600px) {
+            .glass-card { padding: 36px 28px; }
+            #titleText { font-size: 2.5rem; }
+            #mbtiType { font-size: 4.5rem; letter-spacing: 6px; }
+            .stats-row { gap: 12px; }
+            .traits-grid { grid-template-columns: 1fr; }
+            .top-bar { flex-direction: column; align-items: stretch; }
+            .lang-pills { justify-content: center; }
+            .logo { justify-content: center; margin-bottom: 10px; }
+            .theme-toggle { align-self: flex-end; }
         }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <!-- Start Screen -->
-    <div id="start" class="glass-card">
-        <h1>MBTI စစ်မယ်</h1>
-        <p style="text-align:center; color: #ddd; margin-bottom: 30px; line-height: 1.6;">
-            မေးခွန်း ၃၀ အသုံးပြု၍ သင်၏ အတွင်းစိတ်နှင့် အလားအလာများကို <br>
-            <span style="color:var(--accent); font-weight:bold;">တိတိကျကျ</span> ခွဲခြမ်းစိတ်ဖြာပေးပါမည်။
-        </p>
-        <button class="btn-action" onclick="initTest()">စစ်ဆေးမှု စတင်မည်</button>
-    </div>
 
-    <!-- Quiz Screen -->
-    <div id="quiz" class="glass-card hidden">
-        <div class="progress-container">
-            <div id="qCount" style="font-size: 0.9rem; margin-bottom: 8px; color: var(--accent); font-weight:bold;">Question 1 of 30</div>
-            <div class="progress-bar"><div id="bar" class="progress-fill"></div></div>
+    <div class="top-bar">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-brain"></i>
+            </div>
+            <span>Personality Type Explorer</span>
         </div>
-        <div id="qText" class="question-box"></div>
-        <div id="opts" class="options-grid"></div>
+        <div class="lang-pills">
+            <button class="lang-btn active" data-lang="my">မြန်မာ</button>
+            <button class="lang-btn" data-lang="en">English</button>
+            <button class="lang-btn" data-lang="th">ไทย</button>
+        </div>
+        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+            <i class="fas fa-moon"></i>
+        </button>
     </div>
 
-    <!-- Result Screen -->
-    <div id="result" class="glass-card hidden" style="text-align: center;">
-        <p style="text-transform: uppercase; font-size: 0.9rem; color: var(--accent); letter-spacing: 2px;">Your Strategic Type</p>
-        <div id="mbtiType" class="result-header"></div>
-        <h2 id="typeName" style="color: var(--accent-gold); margin-bottom: 15px; font-weight: 400;"></h2>
-        <p id="typeDesc" style="color: #ddd; font-size: 1.05rem; line-height: 1.6; margin-bottom: 25px;"></p>
-
-        <!-- Trait Breakdown -->
-        <div id="traitBreakdown" style="margin-bottom: 30px; text-align: left; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 16px;"></div>
-
-        <div class="analysis-section" id="analysisArea"></div>
-
-        <button class="btn-action" onclick="location.reload()">ပြန်လည်စစ်ဆေးမည်</button>
+    <!-- START SCREEN -->
+    <div class="glass-card visible" id="startScreen">
+        <div class="start-badge">
+            <span class="dot"></span>
+            <span id="badgeText">MBTI Assessment</span>
+        </div>
+        <h1 id="titleText">Discover Your Personality</h1>
+        <p id="welcomeText"></p>
+        <div class="stats-row">
+            <div class="stat-pill">
+                <div class="stat-num">30</div>
+                <div class="stat-label" id="statQ">Questions</div>
+            </div>
+            <div class="stat-pill">
+                <div class="stat-num">5</div>
+                <div class="stat-label" id="statMin">Minutes</div>
+            </div>
+            <div class="stat-pill">
+                <div class="stat-num">16</div>
+                <div class="stat-label" id="statTypes">Personality Types</div>
+            </div>
+        </div>
+        <button class="btn-action" id="startBtn">
+            <i class="fas fa-play-circle" style="margin-right: 10px;"></i>
+            Begin Assessment
+        </button>
+        <div class="footer-note">
+            Based on Myers-Briggs Type Indicator® theory
+        </div>
     </div>
+
+    <!-- QUIZ SCREEN -->
+    <div class="glass-card hidden" id="quizScreen">
+        <div class="progress-wrap">
+            <div class="progress-header">
+                <span class="progress-label" id="progressLabel">Progress</span>
+                <span class="progress-perc-text" id="progressPerc">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        <div class="q-meta">
+            <span class="q-badge" id="qCount">Q 1 / 30</span>
+            <span class="q-category-tag" id="qCatTag"></span>
+        </div>
+        <div id="questionText"></div>
+        <div class="options" id="optionsContainer"></div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div class="glass-card hidden" id="resultScreen">
+        <div class="result-header">
+            <p id="resultIntro"></p>
+            <div id="mbtiType"></div>
+            <div id="typeName"></div>
+        </div>
+        <div class="result-divider"></div>
+        <p id="typeDesc"></p>
+        <div class="traits-grid" id="traitsGrid"></div>
+        <button class="btn-action" id="restartBtn">
+            <i class="fas fa-redo" style="margin-right: 10px;"></i>
+            Retake Assessment
+        </button>
+        <button class="btn-secondary" id="shareBtn">
+            <i class="fas fa-share-alt"></i>
+            Share Result
+        </button>
+    </div>
+
 </div>
-
 <script>
-    const questions = [
-        { q: "လူမှုပတ်ဝန်းကျင်သစ်မှာ သင်ဟာ -", a: [{t:"စကားစပြောရတာကို အားရကျေနပ်တယ်", s:{E:2}}, {t:"သူတစ်ပါး လာပြောမှ ပြန်ပြောလေ့ရှိတယ်", s:{I:2}}] },
-        { q: "ဆုံးဖြတ်ချက်ချတဲ့အခါ သင်ဟာ -", a: [{t:"လက်တွေ့ကျတဲ့ အချက်အလက်ကို ကြည့်တယ်", s:{S:2}}, {t:"ဖြစ်နိုင်ခြေနဲ့ အနာဂတ်ကို ကြည့်တယ်", s:{N:2}}] },
-        { q: "အလုပ်တစ်ခုမှာ သင်ဟာ -", a: [{t:"တိကျတဲ့ Logic နဲ့ စံနှုန်းကို ကြည့်တယ်", s:{T:2}}, {t:"လူမှုရေးနဲ့ သဟဇာတဖြစ်မှုကို ကြည့်တယ်", s:{F:2}}] },
-        { q: "သင့်ရဲ့ အစီအစဉ်တွေဟာ -", a: [{t:"ကြိုတင်ပြင်ဆင်ထားတဲ့အတိုင်း သွားတယ်", s:{J:2}}, {t:"အခြေအနေအရ လိုက်လျောညီထွေ ပြောင်းလဲတယ်", s:{P:2}}] },
-        { q: "စိတ်ပင်ပန်းတဲ့အခါ စွမ်းအင်ပြန်ဖြည့်ဖို့ -", a: [{t:"သူငယ်ချင်းတွေနဲ့ ဆုံတွေ့တယ်", s:{E:2}}, {t:"တစ်ယောက်တည်း တိတ်ဆိတ်စွာ နေတယ်", s:{I:2}}] },
-        { q: "သင်ယူတဲ့အခါ ဘယ်အရာကို ပိုကြိုက်သလဲ -", a: [{t:"လက်တွေ့ အသုံးချလို့ရတဲ့ အရာ", s:{S:2}}, {t:"စိတ်ဝင်စားစရာ သဘောတရား (Theory)", s:{N:2}}] },
-        { q: "ဝေဖန်မှုတစ်ခုကို ဘယ်လိုမြင်သလဲ -", a: [{t:"တိုးတက်ဖို့ လိုအပ်တဲ့ အချက်အလက်", s:{T:2}}, {t:"စိတ်ထိခိုက်စရာ ကိစ္စတစ်ခု", s:{F:2}}] },
-        { q: "အလုပ်စားပွဲကို ကြည့်ရင် -", a: [{t:"အမြဲ သပ်သပ်ရပ်ရပ် ရှိနေတတ်တယ်", s:{J:2}}, {t:"အနည်းငယ် ရှုပ်ပွနေတတ်တယ်", s:{P:2}}] },
-        { q: "လူအများရှေ့ စကားပြောရရင် -", a: [{t:"စွမ်းအင်တက်ကြွလာသလို ခံစားရတယ်", s:{E:2}}, {t:"မြန်မြန်ပြီးသွားရင် ကောင်းမယ်လို့ ထင်တယ်", s:{I:2}}] },
-        { q: "အချက်အလက်တွေကို မှတ်သားတဲ့အခါ -", a: [{t:"အသေးစိတ် အချက်အလက်တွေကို သေချာမှတ်တယ်", s:{S:2}}, {t:"ခြုံငုံမိတဲ့ ပုံရိပ်ကို ပိုမှတ်မိတယ်", s:{N:2}}] },
-        { q: "တစ်စုံတစ်ယောက်နဲ့ ငြင်းခုံရတဲ့အခါ -", a: [{t:"ဘယ်သူမှန်လဲဆိုတာကိုပဲ အဓိကထားတယ်", s:{T:2}}, {t:"တစ်ဖက်လူရဲ့ ခံစားချက်ကိုပါ ထည့်တွက်တယ်", s:{F:2}}] },
-        { q: "အချိန်ဇယားတွေနဲ့ ပတ်သက်ပြီး -", a: [{t:"အတိအကျ လိုက်နာရတာကို နှစ်သက်တယ်", s:{J:2}}, {t:"အချိန်ဇယားမရှိဘဲ လွတ်လပ်တာကို ပိုကြိုက်တယ်", s:{P:2}}] },
-        { q: "အားလပ်ရက်မှာ သင်ဟာ -", a: [{t:"လူအများရှိတဲ့နေရာကို သွားချင်တယ်", s:{E:2}}, {t:"အိမ်မှာပဲ အေးအေးဆေးဆေး နေချင်တယ်", s:{I:2}}] },
-        { q: "အလုပ်တစ်ခု စတင်တဲ့အခါ -", a: [{t:"အရင်လုပ်နေကျ နည်းလမ်းအတိုင်း လုပ်တယ်", s:{S:2}}, {t:"နည်းလမ်းသစ်တွေကို စမ်းသပ်ကြည့်တယ်", s:{N:2}}] },
-        { q: "သူငယ်ချင်းတစ်ယောက် ဝမ်းနည်းနေရင် -", a: [{t:"အဖြေရှာဖို့ အကြံပေးတယ်", s:{T:2}}, {t:"နွေးနွေးထွေးထွေး နှစ်သိမ့်ပေးတယ်", s:{F:2}}] },
-        { q: "အလုပ်တွေကို ဘယ်လိုအပြီးသတ်သလဲ -", a: [{t:"သတ်မှတ်ရက်ထက် စောပြီး အပြီးသတ်တယ်", s:{J:2}}, {t:"သတ်မှတ်ရက် နားနီးမှ အပြင်းအထန်လုပ်တယ်", s:{P:2}}] },
-        { q: "လူအုပ်ကြီးကြားမှာ -", a: [{t:"အလွယ်တကူ စကားပြောနိုင်တယ်", s:{E:2}}, {t:"ဘေးနားမှာပဲ ကပ်နေတတ်တယ်", s:{I:2}}] },
-        { q: "သင်ဟာ -", a: [{t:"လက်တွေ့သမား (Practical)", s:{S:2}}, {t:"စိတ်ကူးယဉ်သမား (Imaginative)", s:{N:2}}] },
-        { q: "အမှန်တရားကို ဖော်ပြတဲ့အခါ -", a: [{t:"တစ်ခါတလေ စိတ်နာစရာဖြစ်ပေမယ့် တည့်ပြောတယ်", s:{T:2}}, {t:"မပြောခင် တစ်ဖက်လူ ဘယ်လိုခံစားရမလဲ စဉ်းစားတယ်", s:{F:2}}] },
-        { q: "စီမံကိန်းတစ်ခုကို -", a: [{t:"အဆင့်လိုက် စနစ်တကျ လုပ်ရတာ ကြိုက်တယ်", s:{J:2}}, {t:"စိတ်ကူးပေါက်သလို လုပ်ရတာ ကြိုက်တယ်", s:{P:2}}] },
-        { q: "ပါတီပွဲတစ်ခုပြီးတဲ့အခါ -", a: [{t:"စွမ်းအင်တွေ ပြည့်ဝလာတယ်", s:{E:2}}, {t:"ပင်ပန်းသွားပြီး အနားယူဖို့ လိုတယ်", s:{I:2}}] },
-        { q: "စာဖတ်တဲ့အခါ -", a: [{t:"စာရေးသူပြောတဲ့အတိုင်း တိုက်ရိုက်ယူတယ်", s:{S:2}}, {t:"စာသားတွေရဲ့ နောက်ကွယ်က အဓိပ္ပာယ်ကို ရှာတယ်", s:{N:2}}] },
-        { q: "ခေါင်းဆောင်တစ်ယောက်ရဲ့ အရည်အချင်းဟာ -", a: [{t:"မျှတပြီး ပြတ်သားမှုရှိခြင်း", s:{T:2}}, {t:"နားလည်ပေးနိုင်ပြီး ကြင်နာမှုရှိခြင်း", s:{F:2}}] },
-        { q: "သင့်ရဲ့ နေထိုင်မှုပုံစံဟာ -", a: [{t:"ဖွဲ့စည်းပုံရှိပြီး တည်ငြိမ်တယ်", s:{J:2}}, {t:"လိုက်လျောညီထွေရှိပြီး ပေါ့ပေါ့ပါးပါးရှိတယ်", s:{P:2}}] },
-        { q: "အလုပ်ခွင်မှာ သင်ဟာ -", a: [{t:"အဖွဲ့လိုက် လုပ်ရတာ ပိုကြိုက်တယ်", s:{E:2}}, {t:"တစ်ယောက်တည်း လုပ်ရတာ ပိုအာရုံစိုက်နိုင်တယ်", s:{I:2}}] },
-        { q: "သင်ဟာ -", a: [{t:"အချက်အလက်ကို ဦးစားပေးသူ", s:{S:2}}, {t:"သီအိုရီနဲ့ အယူအဆကို ဦးစားပေးသူ", s:{N:2}}] },
-        { q: "သူတစ်ပါးနဲ့ ပတ်သက်ရင် -", a: [{t:"အမှားကို တည့်မတ်ပေးဖို့ ဦးစားပေးတယ်", s:{T:2}}, {t:"စိတ်ကျေနပ်မှု ရှိစေဖို့ ဦးစားပေးတယ်", s:{F:2}}] },
-        { q: "အစီအစဉ်တစ်ခု ပြောင်းလဲသွားရင် -", a: [{t:"စိတ်တိုပြီး အနှောင့်အယှက်ဖြစ်တယ်", s:{J:2}}, {t:"အဆင်ပြေပါတယ်၊ ပြောင်းလို့ရတယ်လို့ ထင်တယ်", s:{P:2}}] },
-        { q: "လူမှုဆက်ဆံရေးမှာ သင်ဟာ -", a: [{t:"ပွင့်လင်းပြီး ဖော်ရွေတယ်", s:{E:2}}, {t:"သိုသိုသိပ်သိပ် နေတတ်တယ်", s:{I:2}}] },
-        { q: "သင်ဟာ အလုပ်တစ်ခုကို -", a: [{t:"အဆုံးထိပြီးအောင် အရင်လုပ်တယ်", s:{J:2}}, {t:"အသစ်တွေ ထပ်ရှာရင်း အချိန်ဆွဲတတ်တယ်", s:{P:2}}] }
-    ];
+// Keep the same JavaScript as before, but with updated text
+let currentLang = 'my';
+let currentQ = 0;
+const TOTAL_Q = 30;
+const scores = {E:0,I:0,S:0,N:0,T:0,F:0,J:0,P:0};
 
-    const dataMap = {
-        "INTJ": { name: "The Architect (ဗိသုကာ)", desc: "မဟာဗျူဟာမြောက် စဉ်းစားတွေးခေါ်နိုင်ပြီး အရာရာကို ခွဲခြမ်းစိတ်ဖြာတတ်သူ။", s: ["အမြော်အမြင်ရှိခြင်း", "လွတ်လပ်စွာ တွေးခေါ်ခြင်း", "ပြတ်သားခြင်း"], w: ["ဝေဖန်မှု ပြင်းထန်ခြင်း", "လူမှုဆက်ဆံရေး ခက်ခဲခြင်း"], c: "CEO, Strategic Planner, Software Architect" },
-        "INTP": { name: "The Logician (ယုတ္တိဗေဒပညာရှင်)", desc: "အသိပညာအသစ်များကို စူးစမ်းရသည်ကို ဝါသနာပါပြီး ဆန်းသစ်တီထွင်လိုသူ။", s: ["ဉာဏ်ရည်ထက်မြက်ခြင်း", "ဓမ္မဓိဋ္ဌာန်ကျခြင်း"], w: ["အသေးစိတ်ကို လျစ်လျူရှုခြင်း", "လက်တွေ့လုပ်ရန် နှေးခြင်း"], c: "Philosopher, Data Analyst, Researcher" },
-        "ENTJ": { name: "The Commander (စစ်သေနာပတိ)", desc: "ပြတ်သားသော ခေါင်းဆောင်မှုရှိပြီး ရည်မှန်းချက် ပြည့်မြောက်ရန် တွန်းအားပေးတတ်သူ။", s: ["ထိရောက်မှုရှိခြင်း", "ယုံကြည်မှုရှိခြင်း"], w: ["သည်းခံမှုနည်းခြင်း", "အာဏာရှင်ဆန်ခြင်း"], c: "Business Leader, Lawyer, Entrepreneur" },
-        "ENTP": { name: "The Debater (ငြင်းခုံသူ)", desc: "စိန်ခေါ်မှုများကို နှစ်သက်ပြီး အယူအဆအသစ်များကို မကြောက်မရွံ့ ဆွေးနွေးတတ်သူ။", s: ["ဖန်တီးမှုအားကောင်းခြင်း", "ဉာဏ်ထက်မြက်ခြင်း"], w: ["ငြင်းခုံမှုကို အလွန်အကျွံ နှစ်သက်ခြင်း"], c: "Marketing Strategy, Consultant, Politician" },
-        "INFJ": { name: "The Advocate (လမ်းညွှန်သူ)", desc: "အတွင်းစိတ် နက်နဲပြီး အခြားသူများကို ကူညီလမ်းပြရန် စိတ်အားထက်သန်သူ။", s: ["ကိုယ်ချင်းစာတရားရှိခြင်း", "စိတ်ဓာတ်ပြင်းပြခြင်း"], w: ["စိတ်ဖိစီးမှု ခံရလွယ်ခြင်း", "လျှို့ဝှက်လွန်းခြင်း"], c: "Counselor, Psychologist, Writer" },
-        "INFP": { name: "The Mediator (ကြားဝင်စေ့စပ်သူ)", desc: "နူးညံ့သိမ်မွေ့ပြီး မိမိ၏ ယုံကြည်ချက်နှင့် တန်ဖိုးထားမှုများအပေါ် သစ္စာရှိသူ။", s: ["တီထွင်ဖန်တီးမှုရှိခြင်း", "စိတ်နှလုံးဖြူစင်ခြင်း"], w: ["လက်တွေ့မကျခြင်း", "ကိုယ့်ကိုယ်ကိုယ် ဝေဖန်လွန်းခြင်း"], c: "Artist, Social Worker, Designer" },
-        "ENFJ": { name: "The Protagonist (ခေါင်းဆောင်)", desc: "ဩဇာရှိပြီး လူအများကို စိတ်ဓာတ်တက်ကြွအောင် ဆွဲဆောင်နိုင်သူ။", s: ["စကားပြောကောင်းခြင်း", "ခေါင်းဆောင်မှု"], w: ["ဝေဖန်မှုကို မခံနိုင်ခြင်း", "လူတိုင်းကို အလိုလိုက်ခြင်း"], c: "Teacher, HR Manager, NGO Leader" },
-        "ENFP": { name: "The Campaigner (လှုပ်ရှားသူ)", desc: "တက်ကြွလန်းဆန်းပြီး ပတ်ဝန်းကျင်ရှိ လူများကို ပျော်ရွှင်အောင် လုပ်ပေးနိုင်သူ။", s: ["စိတ်ကူးစိတ်သန်းကောင်းခြင်း", "လူမှုဆက်ဆံရေး"], w: ["အာရုံစူးစိုက်မှုနည်းခြင်း", "ပျင်းလွယ်ခြင်း"], c: "Journalist, PR Specialist, Creative Director" },
-        "ISTJ": { name: "The Inspector (စစ်ဆေးသူ)", desc: "တာဝန်ယူမှု အပြည့်ရှိပြီး အချက်အလက်နှင့် စည်းကမ်းကို အလေးထားသူ။", s: ["ရိုးသားခြင်း", "တည်ငြိမ်ခြင်း", "တိကျခြင်း"], w: ["ပြောင်းလဲမှုကို ကြောက်ခြင်း", "ခေါင်းမာခြင်း"], c: "Accountant, Military Officer, Auditor" },
-        "ISFJ": { name: "The Defender (အကာအကွယ်ပေးသူ)", desc: "တိတ်ဆိတ်စွာဖြင့် မိမိပတ်ဝန်းကျင်ရှိ လူများကို ဂရုစိုက် စောင့်ရှောက်တတ်သူ။", s: ["စိတ်ချရခြင်း", "စိတ်ရှည်ခြင်း"], w: ["ကိုယ့်ကိုယ်ကိုယ် ဂရုစိုက်မှုနည်းခြင်း"], c: "Nurse, Customer Support, Administrator" },
-        "ESTJ": { name: "The Executive (စီမံခန့်ခွဲသူ)", desc: "လက်တွေ့ကျပြီး စနစ်တကျ စီမခန့်ခွဲတတ်သော ခေါင်းဆောင်။", s: ["စည်းကမ်းရှိခြင်း", "ထိရောက်ခြင်း"], w: ["ဝေဖန်မှုလက်ခံရန် ခက်ခဲခြင်း", "တင်းကျပ်လွန်းခြင်း"], c: "Manager, Financial Controller, Project Lead" },
-        "ESFJ": { name: "The Consul (အကြံပေး)", desc: "လူမှုဆက်ဆံရေး ကောင်းမွန်ပြီး အခြားသူများကို ကူညီပေးရသည်ကို ပျော်ရွှင်သူ။", s: ["နွေးထွေးခြင်း", "တာဝန်သိခြင်း"], w: ["သူတစ်ပါးအမြင်ကို အလွန်ဂရုစိုက်ခြင်း"], c: "Event Planner, Receptionist, Sales" },
-        "ISTP": { name: "The Virtuoso (ကျွမ်းကျင်ပညာရှင်)", desc: "လက်တွေ့ အလုပ်လုပ်ရသည်ကို နှစ်သက်ပြီး နည်းပညာပိုင်းတွင် ကျွမ်းကျင်သူ။", s: ["လက်တွေ့ကျခြင်း", "အခက်အခဲဖြေရှင်းနိုင်ခြင်း"], w: ["ခံစားချက်ဖော်ပြရန် ခက်ခြင်း"], c: "Engineer, Mechanic, Forensic Scientist" },
-        "ISFP": { name: "The Adventurer (စွန့်စားသူ)", desc: "လွတ်လပ်မှုကို မြတ်နိုးပြီး အနုပညာဆန်ဆန် နေထိုင်တတ်သူ။", s: ["အနုပညာမျက်စိရှိခြင်း", "သဘောထားပြည့်ခြင်း"], w: ["ကြိုတင်စီစဉ်မှုနည်းခြင်း", "စိတ်ဖိစီးလွယ်ခြင်း"], c: "Photographer, Musician, Interior Designer" },
-        "ESTP": { name: "The Entrepreneur (စွန့်ဦးတီထွင်သူ)", desc: "ချက်ချင်း လက်တွေ့လုပ်ဆောင်တတ်ပြီး စွန့်စားရသည်ကို ပျော်ရွှင်သူ။", s: ["သတ္တိရှိခြင်း", "ဆွဲဆောင်မှုရှိခြင်း"], w: ["သည်းခံမှုနည်းခြင်း", "အန္တရာယ်ကို လျစ်လျူရှုခြင်း"], c: "Stock Trader, Police, Business Broker" },
-        "ESFP": { name: "The Entertainer (ဖျော်ဖြေသူ)", desc: "လက်ရှိအချိန်ကို ပျော်ရွှင်စွာ ဖြတ်သန်းပြီး အခြားသူများကို ပျော်ရွှင်စေသူ။", s: ["ပျော်ပျော်နေတတ်ခြင်း", "လူမှုဆက်ဆံရေးကောင်းခြင်း"], w: ["အနာဂတ်အတွက် မစီစဉ်ခြင်း"], c: "Actor, Performer, Travel Guide" }
-    };
-
-    let idx = 0;
-    let scores = { E:0, I:0, S:0, N:0, T:0, F:0, J:0, P:0 };
-    const totalPoints = questions.length * 2; // Max possible points per category
-
-    function initTest() {
-        document.getElementById('start').classList.add('hidden');
-        document.getElementById('quiz').classList.remove('hidden');
-        renderQ();
+const uiText = {
+    my:{
+        badge:'MBTI စစ်ဆေးမှု',
+        title:'ကိုယ်ရည်ကိုယ်သွေး စစ်ဆေးခြင်း',
+        welcome:'မေးခွန်း ၃၀ ပါဝင်ပြီး ၅ မိနစ်ခန့် ကြာမြင့်ပါမည်။ သင့်ကိုယ်ရည်ကိုယ်သွေးကို အမှန်ကန်ဆုံး သိရှိနိုင်ရန် စိတ်ထဲရှိသည့်အတိုင်း ဖြေဆိုပေးပါ။',
+        start:'စစ်ဆေးမှု စတင်ရန်',
+        intro:'သင့်ကိုယ်ရည်ကိုယ်သွေး အမျိုးအစားမှာ',
+        restart:'ပြန်လည်စစ်ဆေးရန်',
+        share:'ရလဒ်မျှဝေရန်',
+        progress:'တိုးတက်မှု',
+        statQ:'မေးခွန်းများ',
+        statMin:'မိနစ်',
+        statTypes:'အမျိုးအစားများ',
+        qPrefix:'မေးခွန်း',
+        catLabels:{EI:'ဆက်ဆံရေး',SN:'သတင်းအချက်',TF:'ဆုံးဖြတ်ချက်',JP:'ဘဝပုံစံ'}
+    },
+    en:{
+        badge:'MBTI Assessment',
+        title:'Personality Type Explorer',
+        welcome:'Discover your true personality type with 30 carefully crafted questions. Answer honestly — choose what feels most natural to you, not what you think is ideal.',
+        start:'Begin Assessment',
+        intro:'Your Personality Type is',
+        restart:'Retake Assessment',
+        share:'Share Result',
+        progress:'Progress',
+        statQ:'Questions',
+        statMin:'Minutes',
+        statTypes:'Personality Types',
+        qPrefix:'Question',
+        catLabels:{EI:'Energy',SN:'Information',TF:'Decision',JP:'Lifestyle'}
+    },
+    th:{
+        badge:'แบบทดสอบ MBTI',
+        title:'ค้นหาบุคลิกภาพของคุณ',
+        welcome:'แบบทดสอบนี้มี 30 ข้อ ใช้เวลาประมาณ 5 นาที ตอบตามความเป็นจริง — เลือกสิ่งที่รู้สึกเป็นธรรมชาติที่สุดสำหรับคุณ ไม่ใช่สิ่งที่คิดว่าควรจะเป็น',
+        start:'เริ่มการทดสอบ',
+        intro:'ประเภทบุคลิกภาพของคุณคือ',
+        restart:'ทำใหม่อีกครั้ง',
+        share:'แชร์ผลลัพธ์',
+        progress:'ความคืบหน้า',
+        statQ:'คำถาม',
+        statMin:'นาที',
+        statTypes:'ประเภทบุคลิกภาพ',
+        qPrefix:'คำถาม',
+        catLabels:{EI:'พลังงาน',SN:'ข้อมูล',TF:'การตัดสินใจ',JP:'ชีวิต'}
     }
+};
 
-    function renderQ() {
-        const qData = questions[idx];
-        document.getElementById('qText').innerText = qData.q;
-        document.getElementById('qCount').innerText = `Question ${idx + 1} of ${questions.length}`;
-        document.getElementById('bar').style.width = `${((idx + 1) / questions.length) * 100}%`;
+// Questions and typeDescriptions remain the same as before
+const questions = [
+    // EI
+    {cat:'EI',my:{q:"လူအများနဲ့ တွေ့ဆုံရတာက သင့်ကို စွမ်းအင်တက်ကြွစေသလား?",a:"ဟုတ်ကဲ့၊ လူကြားထဲမှာ ပိုတက်ကြွတယ်",b:"မဟုတ်ပါ၊ တစ်ယောက်တည်းနေမှ စွမ်းအင်ပြန်ပြည့်တယ်"},en:{q:"Does spending time with people energize you?",a:"Yes, I feel more alive around others",b:"No, I recharge better when alone"},th:{q:"การอยู่กับคนอื่นทำให้คุณรู้สึกมีพลังงานมากขึ้นไหม?",a:"ใช่ ฉันรู้สึกกระตือรือร้นมากขึ้นเมื่ออยู่กับคน",b:"ไม่ใช่ ฉันชาร์จพลังได้ดีกว่าเมื่ออยู่คนเดียว"}},
+    {cat:'EI',my:{q:"အားလပ်ချိန်မှာ သင်ဟာ -",a:"အပြင်ထွက်ပြီး သူငယ်ချင်းတွေ့ရတာ ပိုကြိုက်တယ်",b:"အိမ်မှာပဲ အေးအေးဆေးဆေး နားရတာ ပိုကြိုက်တယ်"},en:{q:"During your free time, you prefer to —",a:"Go out and catch up with friends",b:"Stay home and relax quietly"},th:{q:"ในเวลาว่าง คุณชอบ —",a:"ออกไปข้างนอกและพบปะเพื่อนฝูง",b:"อยู่บ้านและพักผ่อนอย่างเงียบๆ"}},
+    {cat:'EI',my:{q:"ပါတီပွဲတစ်ခုမှာ သင်ဟာ -",a:"လူသစ်တွေနဲ့ စကားစပြောဖို့ မခက်ခဲဘူး",b:"ရင်းနှီးတဲ့လူတွေနဲ့ပဲ စကားပြောလေ့ရှိတယ်"},en:{q:"At a party or social event, you —",a:"Easily strike up conversations with new people",b:"Tend to stick with people you already know"},th:{q:"ในงานสังสรรค์ คุณ —",a:"เริ่มสนทนากับคนแปลกหน้าได้อย่างง่ายดาย",b:"มักพูดคุยกับคนที่รู้จักกันอยู่แล้วเท่านั้น"}},
+    {cat:'EI',my:{q:"အလုပ်တစ်ခုလုပ်ရင် သင်ဟာ -",a:"အဖွဲ့လိုက် တိုင်ပင်ဆွေးနွေးပြီး လုပ်ရတာ ကြိုက်တယ်",b:"ကိုယ်တိုင် အာရုံစိုက်ပြီး တစ်ယောက်တည်း လုပ်ရတာ ကြိုက်တယ်"},en:{q:"When working on a task, you prefer to —",a:"Collaborate and brainstorm with a team",b:"Focus alone and work independently"},th:{q:"เมื่อทำงาน คุณชอบ —",a:"ปรึกษาหารือและทำงานร่วมกับทีม",b:"มุ่งความสนใจและทำงานคนเดียว"}},
+    {cat:'EI',my:{q:"သင့်ကို လူတွေက ဘယ်လိုမြင်ကြသလဲ?",a:"ပွင့်လင်းပြီး ဖော်ရွေတဲ့သူ",b:"အေးဆေးပြီး တည်ငိမ်တဲ့သူ"},en:{q:"People generally describe you as —",a:"Open, outgoing, and easy to approach",b:"Calm, quiet, and thoughtful"},th:{q:"คนทั่วไปมักมองคุณว่า —",a:"เปิดกว้าง สนุกสนาน และเข้าหาง่าย",b:"สงบนิ่ง เงียบขรึม และรอบคอบ"}},
+    {cat:'EI',my:{q:"စကားပြောတဲ့အခါ သင်ဟာ -",a:"အရင်ပြောပြီးမှ နောက်မှ စဉ်းစားလေ့ရှိတယ်",b:"အရင်သေချာ စဉ်းစားပြီးမှ ပြောလေ့ရှိတယ်"},en:{q:"When in conversation, you tend to —",a:"Speak first, then think it through",b:"Think carefully before you speak"},th:{q:"เมื่อพูดคุย คุณมักจะ —",a:"พูดก่อนแล้วค่อยคิดทีหลัง",b:"คิดให้รอบคอบก่อนจึงพูด"}},
+    {cat:'EI',my:{q:"စိတ်လှုပ်ရှားစရာ အစီအစဉ်အသစ်တွေရှိရင် -",a:"လူတိုင်းကို ချက်ချင်း လိုက်ပြောပြတတ်တယ်",b:"ကိုယ့်ဘာသာပဲ အရင် သိမ်းထားတတ်တယ်"},en:{q:"When you have exciting new plans —",a:"You share them with everyone right away",b:"You keep them to yourself for a while first"},th:{q:"เมื่อคุณมีแผนใหม่ที่น่าตื่นเต้น —",a:"คุณบอกทุกคนทันที",b:"คุณมักเก็บไว้กับตัวเองก่อน"}},
+    // SN
+    {cat:'SN',my:{q:"သင်ဟာ ဘယ်လိုအချက်အလက်ကို ပိုယုံကြည်သလဲ?",a:"လက်တွေ့ကျကျ မြင်တွေ့ရတဲ့ အချက်အလက်",b:"ဖြစ်နိုင်ခြေရှိတဲ့ စိတ်ကူးသစ်တွေ"},en:{q:"What type of information do you trust more?",a:"Concrete, observable facts and details",b:"Possible ideas and future concepts"},th:{q:"คุณเชื่อถือข้อมูลประเภทใดมากกว่า?",a:"ข้อเท็จจริงที่เป็นรูปธรรมและสังเกตได้",b:"ความคิดและแนวคิดที่เป็นไปได้"}},
+    {cat:'SN',my:{q:"အလုပ်တစ်ခု သင်ယူတဲ့အခါ -",a:"အဆင့်ဆင့် ဘယ်လိုလုပ်ရမလဲဆိုတဲ့ ညွှန်ကြားချက်ကို လိုချင်တယ်",b:"ခြုံငုံသုံးသပ်ချက်နဲ့ သဘောတရားကို အရင်သိချင်တယ်"},en:{q:"When learning something new —",a:"You want step-by-step instructions first",b:"You want to understand the big picture and theory first"},th:{q:"เมื่อเรียนรู้สิ่งใหม่ —",a:"คุณต้องการคำแนะนำทีละขั้นตอน",b:"คุณต้องการเข้าใจภาพรวมและทฤษฎีก่อน"}},
+    {cat:'SN',my:{q:"သင့်ရဲ့ အတွေးတွေဟာ -",a:"လက်ရှိအခြေအနေမှာပဲ ရှိနေတတ်တယ်",b:"အနာဂတ် စိတ်ကူးယဉ်မှုတွေမှာ ရှိနေတတ်တယ်"},en:{q:"Your thoughts tend to focus on —",a:"What is present and happening right now",b:"Future possibilities and imaginative ideas"},th:{q:"ความคิดของคุณมักจะมุ่งไปที่ —",a:"สิ่งที่กำลังเกิดขึ้นในปัจจุบัน",b:"ความเป็นไปได้ในอนาคตและจินตนาการ"}},
+    {cat:'SN',my:{q:"ပြဿနာဖြေရှင်းတဲ့အခါ -",a:"ယခင်က အောင်မြန်ခဲ့တဲ့ နည်းလမ်းဟောင်းတွေကို သုံးတယ်",b:"နည်းလမ်းအသစ်တွေကို စမ်းသပ်ကြည့်ရတာ ကြိုက်တယ်"},en:{q:"When solving a problem —",a:"You use methods that have worked before",b:"You enjoy exploring new and creative approaches"},th:{q:"เมื่อแก้ปัญหา —",a:"คุณใช้วิธีที่เคยได้ผลมาก่อน",b:"คุณชอบลองวิธีการใหม่ๆ ที่สร้างสรรค์"}},
+    {cat:'SN',my:{q:"သင်ဟာ အရာရာကို -",a:"အသေးစိတ်ကစပြီး တိတိကျကျ ကြည့်တတ်တယ်",b:"ပုံရိပ်အကြီးကြီးကိုပဲ ခြုံကြည့်တတ်တယ်"},en:{q:"You tend to look at things —",a:"In careful detail and with precision",b:"As a broad overall picture"},th:{q:"คุณมักมองสิ่งต่างๆ —",a:"อย่างละเอียดและแม่นยำ",b:"เป็นภาพรวมใหญ่"}},
+    {cat:'SN',my:{q:"စကားပြောတဲ့အခါ သင်ဟာ -",a:"တိုက်ရိုက်နဲ့ တိကျတဲ့ စကားလုံးကို သုံးတယ်",b:"ဥပမာတွေ၊ တင်စားချက်တွေ သုံးပြောတတ်တယ်"},en:{q:"When speaking, you tend to —",a:"Use direct and precise language",b:"Use examples, analogies, and metaphors"},th:{q:"เมื่อพูดคุย คุณมักจะ —",a:"ใช้ภาษาตรงไปตรงมาและชัดเจน",b:"ใช้ตัวอย่างและการเปรียบเปรย"}},
+    {cat:'SN',my:{q:"လူတွေက သင့်ကို -",a:"လက်တွေ့ကျတဲ့လူလို့ မြင်ကြတယ်",b:"စိတ်ကူးယဉ်ဆန်တဲ့လူလို့ မြင်ကြတယ်"},en:{q:"People tend to see you as —",a:"Practical and realistic",b:"Imaginative and creative"},th:{q:"คนมักมองคุณว่า —",a:"เป็นคนมีปฏิบัตินิยม",b:"เป็นคนมีจินตนาการสูง"}},
+    {cat:'SN',my:{q:"အလုပ်စားပွဲပေါ်မှာ -",a:"လက်ရှိလုပ်ရမယ့် အလုပ်တွေကိုပဲ ထားတယ်",b:"စိတ်ကူးရစေမယ့် ပစ္စည်းမျိုးစုံ ထားတတ်တယ်"},en:{q:"On your workspace or desk —",a:"You keep only what's needed for the task at hand",b:"You keep various items that spark imagination"},th:{q:"บนโต๊ะทำงานของคุณ —",a:"มีแค่สิ่งที่จำเป็นสำหรับงานปัจจุบัน",b:"มีสิ่งของหลากหลายที่จุดประกายความคิดสร้างสรรค์"}},
+    // TF
+    {cat:'TF',my:{q:"ဆုံးဖြတ်ချက်ချရင် ဘာကို ဦးစားပေးသလဲ?",a:"ယုတ္တိဗေဒ (Logic) နဲ့ အမှန်တရား",b:"ခံစားချက်နဲ့ လူမှုရေး သဟဇာတဖြစ်မှု"},en:{q:"When making a decision, you prioritize —",a:"Logic and objective truth",b:"Feelings and social harmony"},th:{q:"เมื่อตัดสินใจ คุณให้ความสำคัญกับ —",a:"ตรรกะและความจริงที่เป็นกลาง",b:"ความรู้สึกและความกลมกลืนทางสังคม"}},
+    {cat:'TF',my:{q:"ဝေဖန်မှုပေးတဲ့အခါ -",a:"အမှန်အတိုင်း ပွင့်ပွင့်လင်းလင်း ပြောတယ်",b:"တစ်ဖက်လူ စိတ်မထိခိုက်အောင် ညှိပြောတယ်"},en:{q:"When giving criticism —",a:"You say it directly and honestly",b:"You soften your words to protect others' feelings"},th:{q:"เมื่อให้คำวิจารณ์ —",a:"คุณพูดตรงๆ อย่างเปิดเผย",b:"คุณปรับคำพูดให้นุ่มนวลเพื่อไม่ให้ผู้อื่นเจ็บปวด"}},
+    {cat:'TF',my:{q:"အငြင်းပွားမှုတစ်ခုမှာ သင်ဟာ -",a:"ဘယ်သူမှန်လဲဆိုတဲ့ အချက်အလက်ကိုပဲ ကြည့်တယ်",b:"အားလုံး ပြေလည်သွားဖို့ကိုပဲ ကြည့်တယ်"},en:{q:"In a disagreement, you focus on —",a:"Who is factually correct",b:"Finding a resolution everyone is happy with"},th:{q:"ในความขัดแย้ง คุณมุ่งเน้น —",a:"ว่าใครถูกต้องตามข้อเท็จจริง",b:"การหาทางออกที่ทุกคนพอใจ"}},
+    {cat:'TF',my:{q:"လူတွေက သင့်ကို -",a:"ဦးနှောက်ကို ဦးစားပေးသူလို့ မြင်တယ်",b:"နှလုံးသားကို ဦးစားပေးသူလို့ မြင်တယ်"},en:{q:"People see you as someone who —",a:"Leads with the head",b:"Leads with the heart"},th:{q:"คนมองคุณว่าเป็นคน —",a:"ใช้หัวคิดมากกว่าหัวใจ",b:"ใช้หัวใจมากกว่าหัวคิด"}},
+    {cat:'TF',my:{q:"အလုပ်မှာ သင်ဟာ -",a:"စွမ်းဆောင်ရည်နဲ့ ရလဒ်ကို အဓိကထားတယ်",b:"ဝန်ထမ်းတွေရဲ့ စိတ်ဓာတ်ပိုင်းကို အဓိကထားတယ်"},en:{q:"At work, you prioritize —",a:"Performance and measurable results",b:"Team morale and people's well-being"},th:{q:"ในการทำงาน คุณให้ความสำคัญกับ —",a:"ประสิทธิภาพและผลลัพธ์ที่วัดได้",b:"ขวัญกำลังใจและความเป็นอยู่ที่ดีของทีม"}},
+    {cat:'TF',my:{q:"သင်ဟာ ဘယ်အရာကို ပိုတန်ဖိုးထားသလဲ?",a:"တရားမျှတမှု (Justice)",b:"ကြင်နာသနားမှု (Mercy)"},en:{q:"Which do you value more?",a:"Justice and fairness",b:"Compassion and mercy"},th:{q:"คุณให้ความสำคัญกับอะไรมากกว่า?",a:"ความยุติธรรม",b:"ความเมตตากรุณา"}},
+    {cat:'TF',my:{q:"သူငယ်ချင်းတစ်ယောက် ပြဿနာတက်ရင် -",a:"အကောင်းဆုံး ဖြေရှင်းနည်းကို အကြံပေးတယ်",b:"သူ့ဘက်ကနေ နားထောင်ပေးပြီး အားပေးတယ်"},en:{q:"When a friend has a problem —",a:"You offer the best solution you can think of",b:"You listen closely and give emotional support"},th:{q:"เมื่อเพื่อนมีปัญหา —",a:"คุณเสนอทางออกที่ดีที่สุด",b:"คุณรับฟังและให้กำลังใจทางอารมณ์"}},
+    // JP
+    {cat:'JP',my:{q:"ခရီးသွားဖို့ ပြင်ဆင်တဲ့အခါ -",a:"အစီအစဉ်ကို ကြိုတင် စနစ်တကျ ဆွဲထားတယ်",b:"ရောက်မှ အဆင်ပြေသလို သွားလာတယ်"},en:{q:"When preparing for a trip —",a:"You plan everything in advance, systematically",b:"You figure it out as you go"},th:{q:"เมื่อเตรียมตัวสำหรับการเดินทาง —",a:"คุณวางแผนล่วงหน้าทุกอย่างอย่างเป็นระบบ",b:"คุณค่อยๆ จัดการตามสถานการณ์"}},
+    {cat:'JP',my:{q:"အလုပ်လုပ်ရင် သင်ဟာ -",a:"သတ်မှတ်ရက်ထက် စောပြီး ပြီးအောင် လုပ်တယ်",b:"နောက်ဆုံးအချိန်နားနီးမှ အရှိန်မြှင့်လုပ်တယ်"},en:{q:"When working on a deadline —",a:"You finish well before the due date",b:"You pick up speed as the deadline approaches"},th:{q:"เมื่อมีกำหนดส่งงาน —",a:"คุณทำเสร็จก่อนกำหนดส่งล่วงหน้า",b:"คุณเพิ่มความเร็วเมื่อใกล้ถึงกำหนดส่ง"}},
+    {cat:'JP',my:{q:"သင့်ရဲ့ နေ့စဉ်ဘဝမှာ -",a:"To-do list တွေ သုံးပြီး စနစ်တကျ နေထိုင်တယ်",b:"အခြေအနေအရ လိုအပ်သလို ပြောင်းလဲနေထိုင်တယ်"},en:{q:"In your daily life —",a:"You use to-do lists and live systematically",b:"You adapt to whatever the situation requires"},th:{q:"ในชีวิตประจำวัน —",a:"คุณใช้รายการสิ่งที่ต้องทำและดำเนินชีวิตอย่างเป็นระบบ",b:"คุณปรับตัวตามสถานการณ์ที่เกิดขึ้น"}},
+    {cat:'JP',my:{q:"ဆုံးဖြတ်ချက်တစ်ခု ချရမယ်ဆိုရင် -",a:"မြန်မြန် ဆုံးဖြတ်ပြီး အပြီးသတ်ရတာ ကြိုက်တယ်",b:"အချိန်ယူပြီး ရွေးချယ်စရာတွေ ထားချင်သေးတယ်"},en:{q:"When a decision needs to be made —",a:"You prefer to decide quickly and move on",b:"You prefer to take your time and keep options open"},th:{q:"เมื่อต้องตัดสินใจ —",a:"คุณชอบตัดสินใจเร็วและก้าวต่อไป",b:"คุณชอบใช้เวลาและเปิดตัวเลือกไว้"}},
+    {cat:'JP',my:{q:"သင့်ရဲ့ အလုပ်စားပွဲဟာ -",a:"အမြဲတမ်း သပ်သပ်ရပ်ရပ် အထွက်ရှိတတ်တယ်",b:"ပစ္စည်းတွေ ပြန့်ကျဲနေတတ်တယ်"},en:{q:"Your work desk is —",a:"Always neat, tidy, and organized",b:"Often scattered with various things"},th:{q:"โต๊ะทำงานของคุณ —",a:"เป็นระเบียบและเรียบร้อยเสมอ",b:"มักมีสิ่งของกระจัดกระจาย"}},
+    {cat:'JP',my:{q:"သင်ဟာ ဘယ်လိုလူမျိုးလဲ?",a:"အစီအစဉ်အတိုင်း သွားရတာ ကြိုက်သူ",b:"လွတ်လွတ်လပ်လပ် နေရတာ ကြိုက်သူ"},en:{q:"You would describe yourself as someone who —",a:"Likes following a set plan",b:"Likes freedom and spontaneity"},th:{q:"คุณจะอธิบายตัวเองว่า —",a:"ชอบทำตามแผนที่วางไว้",b:"ชอบความอิสระและความเป็นธรรมชาติ"}},
+    {cat:'JP',my:{q:"အလုပ်တစ်ခု စတင်တော့မယ်ဆိုရင် -",a:"အရင်ဆုံး ဘယ်လိုလုပ်မလဲဆိုတာ သေချာ စီစဉ်တယ်",b:"တန်းလုပ်ကြည့်ပြီးမှ လိုအပ်တာ ပြင်ဆင်တယ်"},en:{q:"When starting a new task —",a:"You plan carefully before you begin",b:"You dive in and adjust along the way"},th:{q:"เมื่อเริ่มงานใหม่ —",a:"คุณวางแผนอย่างรอบคอบก่อนลงมือ",b:"คุณลงมือทำและปรับปรุงระหว่างทาง"}},
+    {cat:'JP',my:{q:"အပြောင်းအလဲတွေ ကြုံလာတဲ့အခါ -",a:"စိတ်အနည်းငယ် ရှုပ်ထွေးသွားတတ်တယ်",b:"ချက်ချင်း လိုက်လျောညီထွေဖြစ်အောင် နေတတ်တယ်"},en:{q:"When unexpected changes come —",a:"You feel a bit unsettled",b:"You adapt quickly and comfortably"},th:{q:"เมื่อเผชิญกับการเปลี่ยนแปลงที่ไม่คาดคิด —",a:"คุณรู้สึกสับสนเล็กน้อย",b:"คุณปรับตัวได้อย่างรวดเร็ว"}}
+];
 
-        const optArea = document.getElementById('opts');
-        optArea.innerHTML = '';
+const typeDescriptions = {
+    ISTJ:{my:{name:"စစ်ဆေးသူ",desc:"လက်တွေ့ကျ၊ တည်ငြိမ်ပြီး တာဝန်ယူမှု အပြည့်ရှိသူများဖြစ်သည်။ စနစ်တကျ လုပ်ဆောင်ရခြင်းကို နှစ်သက်ပြီး ယုံကြည်စိတ်ချရဆုံးသော သူများဖြစ်သည်။",traits:['🔒 ယုံကြည်စိတ်ချရ','📋 တိကျစနစ်ကျ','🎯 တာဝန်ကျေပွန်','🛡️ ငြိမ်ဝပ်သည်']},en:{name:"Inspector",desc:"Practical and fact-minded individuals whose reliability cannot be doubted. They value tradition, loyalty, and diligence above all else.",traits:['🔒 Deeply Reliable','📋 Highly Organized','🎯 Duty-Bound','🛡️ Calm & Steady']},th:{name:"นักตรวจสอบ",desc:"เป็นคนที่มีความรับผิดชอบสูง จริงจัง และเชื่อถือได้ ให้ความสำคัญกับประเพณี ความภักดี และความขยันหมั่นเพียร",traits:['🔒 เชื่อถือได้สูง','📋 มีระเบียบมาก','🎯 รับผิดชอบ','🛡️ สงบและมั่นคง']}},
+    ISFJ:{my:{name:"ကာကွယ်သူ",desc:"နွေးထွေးပြီး အားကိုးထိုက်သူများဖြစ်သည်။ သူတစ်ပါးကို ကူညီရန် အမြဲအသင့်ရှိနေတတ်ပြီး တာဝန်ကျေပွန်သူများဖြစ်သည်။",traits:['❤️ နူးညံ့နွေးထွေး','🌟 ယုံကြည်ထိုက်','🤝 ကူညီဝန်ဆောင်','🔑 တာဝန်ကျေ']},en:{name:"Protector",desc:"Warm and dedicated protectors who are always ready to defend those they care about. They combine a kind heart with a remarkable work ethic.",traits:['❤️ Warm & Caring','🌟 Highly Dependable','🤝 Selfless Helper','🔑 Detail-Oriented']},th:{name:"ผู้พิทักษ์",desc:"อบอุ่น มีความรับผิดชอบ และพร้อมช่วยเหลือผู้อื่นเสมอ ผสมผสานจิตใจที่ดีกับจริยธรรมในการทำงานที่โดดเด่น",traits:['❤️ อบอุ่นใจดี','🌟 เชื่อถือได้สูง','🤝 ช่วยเหลือโดยไม่เห็นแก่ตัว','🔑 ใส่ใจรายละเอียด']}},
+    INFJ:{my:{name:"အကြံပေးသူ",desc:"နက်ရှိုင်းသောအတွေးအခေါ်ရှိပြီး စိတ်ကူးယဉ်ဆန်သူများဖြစ်သည်။ လောကကြီးကို ပိုကောင်းအောင် ပြောင်းလဲလိုစိတ် ပြင်းပြသူများဖြစ်သည်။",traits:['🔮 အနာဂတ်မြင်','💜 စာနာတတ်','✨ ဆိုင်ရာဖိတ်ဆောင်','🌱 ပြောင်းလဲလိုစိတ်']},en:{name:"Advocate",desc:"Quiet and mystical, yet very inspiring and tireless idealists who seek meaning and purpose. They are rare visionaries driven by strong moral values.",traits:['🔮 Deep Visionary','💜 Highly Empathetic','✨ Quietly Inspiring','🌱 Change-Driven']},th:{name:"ผู้แนะนำ",desc:"เงียบขรึม มีความคิดลึกซึ้ง และมุ่งมั่นทำให้โลกดีขึ้น เป็นนักอุดมคตินิยมที่หายากและขับเคลื่อนด้วยคุณค่าทางศีลธรรมที่แข็งแกร่ง",traits:['🔮 มีวิสัยทัศน์ลึก','💜 เข้าอกเข้าใจสูง','✨ สร้างแรงบันดาลใจ','🌱 มุ่งเปลี่ยนแปลง']}},
+    INTJ:{my:{name:"ဗိသုကာ",desc:"မဟာဗျူဟာမြောက် စဉ်းစားတွေးခေါ်နိုင်ပြီး ကိုယ့်ကိုယ်ကို ယုံကြည်မှုရှိသူများဖြစ်သည်။ အရာရာကို ခွဲခြမ်းစိတ်ဖြာပြီး တီထွင်တတ်ကြသည်။",traits:['🧠 မဟာဗျူဟာကျ','⚡ ကြိမ်းမောင်း','🔬 ခွဲခြမ်းနိုင်','💡 တီထွင်တတ်']},en:{name:"Architect",desc:"Imaginative and strategic thinkers with a plan for everything. They combine a relentless drive for excellence with deep intellectual curiosity.",traits:['🧠 Strategic Mind','⚡ Decisive & Driven','🔬 Deep Analyst','💡 Original Thinker']},th:{name:"นักออกแบบ",desc:"นักคิดเชิงกลยุทธ์ที่มีแผนสำหรับทุกอย่าง ผสมผสานแรงขับเคลื่อนที่ไม่ย่อท้อเพื่อความเป็นเลิศกับความอยากรู้ทางปัญญา",traits:['🧠 คิดเชิงกลยุทธ์','⚡ เด็ดขาด','🔬 วิเคราะห์ลึก','💡 นักคิดต้นแบบ']}},
+    ISTP:{my:{name:"လက်မှုပညာရှင်",desc:"လက်တွေ့ကျပြီး စူးစမ်းလိုစိတ်ရှိသူများဖြစ်သည်။ ပြဿနာများကို လက်တွေ့ကျကျ ဖြေရှင်းရတာကို နှစ်သက်ပြီး လိုက်လျောညီထွေရှိသူများဖြစ်သည်။",traits:['🔧 ကျွမ်းကျင်','🧩 ဖြေရှင်းတတ်','🌊 လိုက်လျောညီထွေ','⚙️ ကစားခြင်းကိုနှစ်သက်']},en:{name:"Virtuoso",desc:"Bold and practical experimenters who love to explore with their hands and eyes. They are calm in a crisis and thrive when troubleshooting hands-on.",traits:['🔧 Hands-On Expert','🧩 Natural Problem-Solver','🌊 Calm Under Pressure','⚙️ Loves Mechanics']},th:{name:"ผู้เชี่ยวชาญด้านทักษะ",desc:"นักทดลองที่กล้าหาญและเชี่ยวชาญด้านเครื่องมือ สงบในยามวิกฤต และเก่งเมื่อต้องแก้ปัญหาด้วยมือตนเอง",traits:['🔧 ผู้เชี่ยวชาญปฏิบัติ','🧩 แก้ปัญหาโดยธรรมชาติ','🌊 สงบภายใต้แรงกดดัน','⚙️ ชอบกลไก']}},
+    ISFP:{my:{name:"အနုပညာရှင်",desc:"လက်ရှိအချိန်ကို တန်ဖိုးထားပြီး အနုပညာဆန်သူများဖြစ်သည်။ ပျော့ပျောင်းညင်သာပြီး ကိုယ်ပိုင်ဟန်ဖြင့် နေထိုင်သူများဖြစ်သည်။",traits:['🎨 ဖန်တီးတတ်','🌸 ပျော့ပျောင်းနူးညံ့','🦋 လွတ်လပ်ခြင်းကိုနှစ်သက်','💫 ယခုပဲပြည့်ဝ']},en:{name:"Adventurer",desc:"Flexible and charming artists, always ready to explore something new. They live in the moment and find beauty in the little things of everyday life.",traits:['🎨 Creatively Gifted','🌸 Gentle & Kind','🦋 Freedom-Loving','💫 Lives in the Moment']},th:{name:"นักผจญภัย",desc:"ศิลปินที่ยืดหยุ่นและมีเสน่ห์ พร้อมสำรวจสิ่งใหม่เสมอ อยู่กับปัจจุบันและพบความงามในสิ่งเล็กน้อยในชีวิตประจำวัน",traits:['🎨 มีพรสวรรค์สร้างสรรค์','🌸 อ่อนโยนและใจดี','🦋 รักอิสรภาพ','💫 อยู่กับปัจจุบัน']}},
+    INFP:{my:{name:"ကြားဝင်စေ့စပ်သူ",desc:"နူးညံ့ပြီး စိတ်ကူးယဉ်ဆန်သူများဖြစ်သည်။ မိမိယုံကြည်ချက်အပေါ် သစ္စာရှိပြီး သူတစ်ပါးကို နားလည်ပေးနိုင်သူများဖြစ်သည်။",traits:['📖 ကဗျာဆန်','💚 နူးညံ့','🌙 ဝိညာဉ်ရှာ','🌿 ပြည့်ဝသောတန်ဖိုးများ']},en:{name:"Mediator",desc:"Poetic, kind, and altruistic people who are always eager to help a good cause. They see potential in people and cherish deep, meaningful relationships.",traits:['📖 Deeply Idealistic','💚 Empathetic & Kind','🌙 Introspective','🌿 Values-Driven']},th:{name:"ผู้ไกล่เกลี่ย",desc:"คนที่มีจิตใจดี มีความคิดสร้างสรรค์ และยึดมั่นในอุดมการณ์ เห็นศักยภาพในผู้คนและให้คุณค่ากับความสัมพันธ์ที่ลึกซึ้ง",traits:['📖 นักอุดมคตินิยม','💚 เห็นอกเห็นใจ','🌙 ชอบไตร่ตรอง','🌿 ขับเคลื่อนด้วยคุณค่า']}},
+    INTP:{my:{name:"တွေးခေါ်ရှင်",desc:"အသိပညာ ရှာဖွေရတာကို နှစ်သက်ပြီး စူးစမ်းလိုစိတ် ပြင်းပြသူများဖြစ်သည်။ ယုတ္တိဗေဒကျကျ တွေးခေါ်တတ်ကြသည်။",traits:['🔭 ဗဟုသုတရှာ','🧩 ယုတ္တိပြည့်','⚡ ကျော်မြင်','🌐 စနစ်ချ']},en:{name:"Logician",desc:"Innovative inventors with an unquenchable thirst for knowledge. They love patterns and logic, and delight in finding unexpected connections.",traits:['🔭 Knowledge-Hungry','🧩 Logical Thinker','⚡ Quick-Witted','🌐 Systems Thinker']},th:{name:"นักตรรกะ",desc:"นักคิดสร้างสรรค์ที่หลงใหลในความรู้ ชอบรูปแบบและตรรกะ และยินดีค้นพบความเชื่อมโยงที่ไม่คาดคิด",traits:['🔭 กระหายความรู้','🧩 ตรรกะคมคาย','⚡ ไหวพริบดี','🌐 คิดเป็นระบบ']}},
+    ESTP:{my:{name:"စွမ်းအင်ရှင်",desc:"တက်ကြွပြီး စွန့်စားရတာကို နှစ်သက်သူများဖြစ်သည်။ လက်တွေ့ကျကျ ချက်ချက်လုပ်ဆောင်ရတာကို သဘောကျသူများဖြစ်သည်။",traits:['⚡ တက်ကြွ','🎲 ရဲရင့်','👁️ မြင်ကွင်းကြယ်','🏃 လှုပ်ရှားတက်ကြွ']},en:{name:"Entrepreneur",desc:"Smart, energetic, and perceptive people who truly enjoy living on the edge. They excel under pressure and are masters of reading a room.",traits:['⚡ Bold & Energetic','🎲 Risk-Taker','👁️ Perceptive','🏃 Action-Oriented']},th:{name:"ผู้ประกอบการ",desc:"คนฉลาด มีพลังงาน และมีไหวพริบที่ชอบความท้าทาย เก่งภายใต้แรงกดดันและอ่านห้องได้อย่างเชี่ยวชาญ",traits:['⚡ กล้าและกระตือรือร้น','🎲 ชอบเสี่ยง','👁️ มีไหวพริบ','🏃 มุ่งปฏิบัติ']}},
+    ESFP:{my:{name:"ဖျော်ဖြေသူ",desc:"ပျော်ပျော်နေတတ်ပြီး လူမှုဆက်ဆံရေး ကောင်းသူများဖြစ်သည်။ ဘဝကို ပျော်ရွှင်စွာ ဖြတ်သန်းပြီး အခြားသူများကိုလည်း ပျော်ရွှင်စေသူများဖြစ်သည်။",traits:['🎉 ပျော်ရွှင်','🌟 ကြည်နူးသည်','🎭 ဖျော်ဖြေ','❤️ ချစ်ခင်']},en:{name:"Entertainer",desc:"Spontaneous, energetic, and enthusiastic people — life is never boring around them. They love the spotlight and thrive on connecting with others.",traits:['🎉 Spontaneous Joy','🌟 Warmly Enthusiastic','🎭 Natural Performer','❤️ Deeply Caring']},th:{name:"ผู้ให้ความบันเทิง",desc:"สนุกสนาน มีพลังงาน และกระตือรือร้น — ชีวิตรอบข้างพวกเขาไม่มีน่าเบื่อ ชอบอยู่ในสปอตไลต์และเชื่อมต่อกับผู้อื่น",traits:['🎉 ความสุขที่เกิดขึ้นเอง','🌟 กระตือรือร้นอบอุ่น','🎭 นักแสดงโดยธรรมชาติ','❤️ ใส่ใจลึกซึ้ง']}},
+    ENFP:{my:{name:"လှုပ်ရှားသူ",desc:"စိတ်အားထက်သန်ပြီး ပေါင်းသင်းဆက်ဆံရေး ကောင်းသူများဖြစ်သည်။ စိတ်ကူးသစ်များဖြင့် အမြဲတက်ကြွနေတတ်ကြသည်။",traits:['✨ စိတ်ကူးဘဝ','🌈 ပျော်ရွှင်','🔥 ဝံုနိုင်','🌻 ကောင်းမွန်']},en:{name:"Campaigner",desc:"Enthusiastic, creative, and sociable free spirits who can always find a reason to smile. They inspire those around them with genuine warmth.",traits:['✨ Creative Spirit','🌈 Enthusiastic','🔥 Highly Motivated','🌻 Genuinely Warm']},th:{name:"นักรณรงค์",desc:"กระตือรือร้น มีความคิดสร้างสรรค์ และเข้ากับคนง่าย สร้างแรงบันดาลใจให้คนรอบข้างด้วยความอบอุ่นที่แท้จริง",traits:['✨ จิตวิญญาณสร้างสรรค์','🌈 กระตือรือร้น','🔥 มีแรงจูงใจสูง','🌻 อบอุ่นแท้จริง']}},
+    ENTP:{my:{name:"စိန်ခေါ်သူ",desc:"ဉာဏ်ထက်မြက်ပြီး စကားပြောကောင်းသူများဖြစ်သည်။ အယူအဆအသစ်တွေကို စိန်ခေါ်ရတာကို နှစ်သက်ပြီး တီထွင်ကြံဆတတ်ကြသည်။",traits:['💬 ဆွေးနွေးကောင်း','🌐 ကြီးကျယ်','💡 တီထွင်','🎯 ထောင်ကြည့်']},en:{name:"Debater",desc:"Smart and curious thinkers who cannot resist an intellectual challenge. They thrive on sparking ideas and have a knack for seeing all sides of every argument.",traits:['💬 Brilliant Debater','🌐 Big-Picture Thinker','💡 Idea Generator','🎯 Quick Strategist']},th:{name:"นักโต้เถียง",desc:"นักคิดที่ฉลาดและอยากรู้อยากเห็นซึ่งไม่สามารถต้านทานความท้าทายทางปัญญา ชอบจุดประกายความคิดและมองเห็นทุกด้านของข้อโต้แย้ง",traits:['💬 นักโต้เถียงเก่ง','🌐 มองภาพรวมใหญ่','💡 สร้างไอเดีย','🎯 นักกลยุทธ์คมคาย']}},
+    ESTJ:{my:{name:"ကြီးကြပ်သူ",desc:"လက်တွေ့ကျပြီး စီမံခန့်ခွဲမှု ကောင်းသူများဖြစ်သည်။ စနစ်တကျ ဦးဆောင်ရတာကို နှစ်သက်ပြီး ပြတ်သားသူများဖြစ်သည်။",traits:['📊 စီမံခန့်ခွဲ','📌 တာဝန်ဝတ်ကျ','🏛️ ဆင်ခြင်','✅ ဦးဆောင်ကောင်း']},en:{name:"Executive",desc:"Excellent administrators, unsurpassed at managing things and people. They uphold tradition and order, and are often pillars of their communities.",traits:['📊 Expert Administrator','📌 Duty-Focused','🏛️ Values Order','✅ Natural Leader']},th:{name:"ผู้บริหาร",desc:"นักบริหารจัดการที่ยอดเยี่ยมและมีระเบียบ ยึดมั่นในประเพณีและความเป็นระเบียบ มักเป็นเสาหลักของชุมชน",traits:['📊 นักบริหารชำนาญ','📌 มุ่งเน้นหน้าที่','🏛️ รักระเบียบ','✅ ผู้นำโดยธรรมชาติ']}},
+    ESFJ:{my:{name:"ပံ့ပိုးသူ",desc:"ဖော်ရွေပြီး စိတ်ထားကောင်းသူများဖြစ်သည်။ လူမှုအသိုင်းအဝိုင်းတွင် အားလုံးနှင့် ပြေလည်အောင် ပေါင်းသင်းတတ်ကြသည်။",traits:['🤗 နွေးထွေး','🌺 ကူညီ','🎁 ကြင်နာ','👑 ချစ်ခင်ကြည်ညိုမှုရ']},en:{name:"Consul",desc:"Extraordinarily caring, social, and popular people, always eager to help. They take pride in bringing people together and supporting those around them.",traits:['🤗 Warmly Welcoming','🌺 Loves to Help','🎁 Generous','👑 Socially Attuned']},th:{name:"ผู้ให้คำปรึกษา",desc:"ใส่ใจผู้อื่นอย่างพิเศษ มีมนุษยสัมพันธ์ดี และเป็นที่รักของทุกคน ภาคภูมิใจในการรวมผู้คนเข้าด้วยกัน",traits:['🤗 ต้อนรับอย่างอบอุ่น','🌺 ชอบช่วยเหลือ','🎁 เอื้อเฟื้อเผื่อแผ่','👑 เชี่ยวชาญด้านสังคม']}},
+    ENFJ:{my:{name:"ခေါင်းဆောင်",desc:"ဩဇာရှိပြီး စိတ်ဓာတ်တက်ကြွစေသူများဖြစ်သည်။ အခြားသူများ၏ အလားအလာကို မြှင့်တင်ပေးနိုင်သော ခေါင်းဆောင်ကောင်းများဖြစ်သည်။",traits:['🌟 ဩဇာရှင်','💛 စာနာ','🎤 ဆွဲဆောင်','🌱 ပြုပြင်ထောက်ပံ့']},en:{name:"Protagonist",desc:"Charismatic and inspiring leaders who captivate the room. They are deeply empathetic and natural mentors who see the best in everyone.",traits:['🌟 Magnetic Charisma','💛 Deep Empathy','🎤 Inspiring Speaker','🌱 Nurturing Mentor']},th:{name:"ตัวเอก",desc:"ผู้นำที่มีเสน่ห์และสร้างแรงบันดาลใจ เห็นอกเห็นใจอย่างลึกซึ้ง และเป็นที่ปรึกษาโดยธรรมชาติที่เห็นสิ่งดีที่สุดในทุกคน",traits:['🌟 เสน่ห์ดึงดูดใจ','💛 เห็นอกเห็นใจลึก','🎤 นักพูดสร้างแรงบันดาลใจ','🌱 พี่เลี้ยงที่ดูแล']}},
+    ENTJ:{my:{name:"စစ်သူကြီး",desc:"ပြတ်သားပြီး ရည်မှန်းချက် ကြီးမားသူများဖြစ်သည်။ အခက်အခဲများကို ကျော်လွှားပြီး ပန်းတိုင်ရောက်အောင် ဦးဆောင်နိုင်သူများဖြစ်သည်။",traits:['⚔️ ဆုံးဖြတ်နိုင်','🏆 ရည်မှန်းချက်ကြီး','💼 ဦးဆောင်ကောင်း','🔥 ကျင်ဆက်']},en:{name:"Commander",desc:"Bold, imaginative, and strong-willed leaders who always find a way — or make one. They are visionaries who inspire others to reach for ambitious goals.",traits:['⚔️ Boldly Decisive','🏆 Highly Ambitious','💼 Strategic Leader','🔥 Driven & Focused']},th:{name:"ผู้บัญชาการ",desc:"ผู้นำที่มั่นใจ เด็ดขาด และมีเป้าหมายที่ชัดเจน มีวิสัยทัศน์และสร้างแรงบันดาลใจให้คนอื่นก้าวไปสู่เป้าหมายที่ทะเยอทะยาน",traits:['⚔️ เด็ดขาดกล้าหาญ','🏆 มีความทะเยอทะยานสูง','💼 ผู้นำเชิงกลยุทธ์','🔥 มุ่งมั่นและมีสมาธิ']}}
+};
 
-        // Add animation delay for buttons
-        qData.a.forEach((opt, i) => {
-            const b = document.createElement('button');
-            b.className = 'opt-btn';
-            b.innerText = opt.t;
-            b.style.animation = `fadeIn 0.5s ease-out ${i * 0.1}s forwards`;
-            b.style.opacity = '0';
-            b.onclick = () => {
-                for(let key in opt.s) scores[key] += opt.s[key];
-                idx++;
-                if(idx < questions.length) {
-                    renderQ();
-                    window.scrollTo({top: 0, behavior: 'smooth'});
-                } else showResult();
-            };
-            optArea.appendChild(b);
+/* ===================== HELPERS ===================== */
+function setLanguage(lang) {
+    currentLang = lang;
+    const t = uiText[lang];
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+    document.documentElement.lang = lang;
+    document.getElementById('badgeText').textContent    = t.badge;
+    document.getElementById('titleText').textContent    = t.title;
+    document.getElementById('welcomeText').textContent  = t.welcome;
+    document.getElementById('startBtn').textContent     = t.start;
+    document.getElementById('restartBtn').textContent   = t.restart;
+    document.getElementById('shareBtn').innerHTML       = '<i class="fas fa-share-alt"></i> ' + t.share;
+    document.getElementById('statQ').textContent        = t.statQ;
+    document.getElementById('statMin').textContent      = t.statMin;
+    document.getElementById('statTypes').textContent    = t.statTypes;
+    document.getElementById('progressLabel').textContent = t.progress;
+    if (!document.getElementById('quizScreen').classList.contains('hidden')) showQuestion();
+}
+
+function transition(hideEl, showEl, cb) {
+    hideEl.classList.remove('visible');
+    setTimeout(() => {
+        hideEl.classList.add('hidden');
+        showEl.classList.remove('hidden');
+        setTimeout(() => { showEl.classList.add('visible'); if(cb) cb(); }, 30);
+    }, 300);
+}
+
+function startTest() {
+    transition(document.getElementById('startScreen'), document.getElementById('quizScreen'));
+    showQuestion();
+}
+
+function showQuestion() {
+    const q = questions[currentQ];
+    const loc = q[currentLang];
+    const t = uiText[currentLang];
+    const pct = Math.round((currentQ / TOTAL_Q) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPerc').textContent = pct + '%';
+    document.getElementById('qCount').textContent = `${t.qPrefix} ${currentQ + 1} / ${TOTAL_Q}`;
+    document.getElementById('qCatTag').textContent = t.catLabels[q.cat] || q.cat;
+    document.getElementById('questionText').textContent = loc.q;
+    const opts = document.getElementById('optionsContainer');
+    opts.innerHTML = '';
+    [loc.a, loc.b].forEach((label, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = label;
+        btn.addEventListener('click', () => handleAnswer(i === 0 ? q.cat[0] : q.cat[1]));
+        opts.appendChild(btn);
+    });
+}
+
+function handleAnswer(key) {
+    scores[key]++;
+    currentQ++;
+    const pct = Math.round((currentQ / TOTAL_Q) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPerc').textContent = pct + '%';
+    if (currentQ < TOTAL_Q) { showQuestion(); } else { showResult(); }
+}
+
+function showResult() {
+    const type = (scores.E>=scores.I?'E':'I')+(scores.S>=scores.N?'S':'N')+(scores.T>=scores.F?'T':'F')+(scores.J>=scores.P?'J':'P');
+    const data = typeDescriptions[type]?.[currentLang] ?? {name:'—',desc:'No description available.',traits:[]};
+    transition(document.getElementById('quizScreen'), document.getElementById('resultScreen'), () => {
+        document.getElementById('resultIntro').textContent = uiText[currentLang].intro;
+        document.getElementById('mbtiType').textContent   = type;
+        document.getElementById('typeName').textContent   = data.name;
+        document.getElementById('typeDesc').textContent   = data.desc;
+        const grid = document.getElementById('traitsGrid');
+        grid.innerHTML = '';
+        (data.traits || []).forEach(trait => {
+            const parts = trait.split(' ');
+            const icon = parts[0];
+            const label = parts.slice(1).join(' ');
+            const card = document.createElement('div');
+            card.className = 'trait-card';
+            card.innerHTML = `<div class="trait-icon">${icon}</div><div class="trait-label">${label}</div>`;
+            grid.appendChild(card);
+        });
+    });
+}
+
+function resetTest() {
+    currentQ = 0;
+    Object.keys(scores).forEach(k => scores[k] = 0);
+    document.getElementById('progressFill').style.width = '0%';
+    document.getElementById('progressPerc').textContent = '0%';
+    transition(document.getElementById('resultScreen'), document.getElementById('startScreen'));
+    setLanguage(currentLang);
+}
+
+function shareResult() {
+    const type = document.getElementById('mbtiType').textContent;
+    const name = document.getElementById('typeName').textContent;
+    const text = `My MBTI type is ${type} – ${name}! 🎉 Discover yours at this personality test.`;
+    const btn = document.getElementById('shareBtn');
+    if (navigator.share) {
+        navigator.share({ title: 'My MBTI Result', text }).catch(() => {});
+    } else {
+        navigator.clipboard?.writeText(text).then(() => {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(() => btn.innerHTML = orig, 2000);
         });
     }
+}
 
-    function showResult() {
-        document.getElementById('quiz').classList.add('hidden');
-        document.getElementById('result').classList.remove('hidden');
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.dataset.theme === 'dark';
+    html.dataset.theme = isDark ? 'light' : 'dark';
+    document.getElementById('themeToggle').innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+}
 
-        // Calculate Type
-        const type = (scores.E >= scores.I ? 'E':'I') +
-                     (scores.S >= scores.N ? 'S':'N') +
-                     (scores.T >= scores.F ? 'T':'F') +
-                     (scores.J >= scores.P ? 'J':'P');
-
-        const d = dataMap[type] || dataMap["INTJ"];
-
-        document.getElementById('mbtiType').innerText = type;
-        document.getElementById('typeName').innerText = d.name;
-        document.getElementById('typeDesc').innerText = d.desc;
-
-        // Generate Trait Bars
-        const breakdownHTML = `
-            <div class="trait-bar-container">
-                <div class="trait-label"><span>Extrovert (E)</span><span>Introvert (I)</span></div>
-                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.E / (scores.E + scores.I)) * 100}%"></div></div>
-            </div>
-            <div class="trait-bar-container">
-                <div class="trait-label"><span>Sensing (S)</span><span>Intuition (N)</span></div>
-                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.S / (scores.S + scores.N)) * 100}%"></div></div>
-            </div>
-            <div class="trait-bar-container">
-                <div class="trait-label"><span>Thinking (T)</span><span>Feeling (F)</span></div>
-                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.T / (scores.T + scores.F)) * 100}%"></div></div>
-            </div>
-            <div class="trait-bar-container">
-                <div class="trait-label"><span>Judging (J)</span><span>Perceiving (P)</span></div>
-                <div class="trait-track"><div class="trait-center"></div><div class="trait-fill" style="width: ${(scores.J / (scores.J + scores.P)) * 100}%"></div></div>
-            </div>
-        `;
-        document.getElementById('traitBreakdown').innerHTML = breakdownHTML;
-
-        // Trigger reflow for animation
-        setTimeout(() => {
-            document.querySelectorAll('.trait-fill').forEach(el => {
-                // Force reflow to trigger transition
-                el.style.width = el.style.width;
-            });
-        }, 100);
-
-        document.getElementById('analysisArea').innerHTML = `
-            <div class="analysis-card"><h3>💪 အားသာချက်များ</h3><p style="color:#ccc">${d.s.join(', ')}</p></div>
-            <div class="analysis-card" style="border-left-color:#ff4b2b"><h3>⚠️ သတိပြုရန်အချက်များ</h3><p style="color:#ccc">${d.w.join(', ')}</p></div>
-            <div class="analysis-card" style="border-left-color:var(--accent-gold)"><h3>💼 သင့်လျော်သော အလုပ်အကိုင်များ</h3><p style="color:#ccc">${d.c}</p></div>
-        `;
-        window.scrollTo({top: 0, behavior: 'smooth'});
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.lang-btn').forEach(btn => btn.addEventListener('click', () => setLanguage(btn.dataset.lang)));
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('startBtn').addEventListener('click', startTest);
+    document.getElementById('restartBtn').addEventListener('click', resetTest);
+    document.getElementById('shareBtn').addEventListener('click', shareResult);
+    setLanguage(currentLang);
+});
 </script>
-
 </body>
 </html>
