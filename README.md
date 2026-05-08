@@ -4,7 +4,7 @@
 
 ---
 
-## 🔗 link <https://ath1t.github.io/my-mbti-test/>
+## link <https://ath1t.github.io/my-mbti-test/>
 
 ## ✨ အဓိက ပါဝင်သော Feature များ
 
